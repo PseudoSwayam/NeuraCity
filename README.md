@@ -4,6 +4,8 @@ NeuraCity is a full-stack, AI-first intelligent system designed to bring real-ti
 
 > Think of it as the **AI nervous system** for any multi-building campus — sensing, analyzing, and acting across modalities.
 
+![NeuraCity Architecture](docs/Architecture.png)
+
 ---
 
 ## 🚨 Problem
