@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.ipynb_checkpoints
+*.sqlite3
+*.log
+
+# Environment files
+.env
+venv/
+env/
+
+# System
+.DS_Store
+Thumbs.db
+
+# Node.js / React
+node_modules/
+.vscode/
+
+# Data and Models
+*.h5
+*.ckpt
+*.pt
+*.onnx
+*.tflite
+*.joblib
+*.pkl
+*.model
+*.sav
+
+# Project Folders
+models/
+datasets/
+logs/
+outputs/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+
+# VS Code
+.vscode/
