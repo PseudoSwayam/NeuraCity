@@ -51,9 +51,8 @@ Each module or component lives in a dedicated folder:
 	•	Never force push unless explicitly approved
 
 ## ✅ Naming Conventions
-	•	Branch (optional): feat/folder-name-description
-	•	Commits: verb: summary
-        Example: add: YOLO inference for fall detection
+	Commits: verb: summary
+ 	Example: add: YOLO inference for fall detection
 
 ---
 
