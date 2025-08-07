@@ -202,8 +202,4 @@ Successful Response (200 OK):
 This module was built with extensibility in mind. Potential future features include:
 - 📸 Multi-modal Inputs: Accepting image-based queries (e.g., "Where is this building?").
 - 🏷️ Intent Classification: A lightweight model to quickly classify user intent for faster routing to API triggers without full LLM reasoning.
-<<<<<<< HEAD
 - 🌍 Contextual Awareness: Incorporating time, date, and user location for more relevant, personalized responses.
-=======
-- 🌍 Contextual Awareness: Incorporating time, date, and user location for more relevant, personalized responses.
->>>>>>> d885094915e92489e42e0fe124f558a4fcaf6b6e
