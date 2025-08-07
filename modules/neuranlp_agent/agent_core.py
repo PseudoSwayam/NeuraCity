@@ -8,8 +8,8 @@ import logging
 
 logging.basicConfig(level=config.LOGGING_LEVEL)
 
-# STEP 1: Manually define the prompt template that langchain-hub was providing.
-# This removes the need for the problematic dependency entirely.
+# STEP 1: Manually define the complete and correct prompt template.
+# This version now includes the required {agent_scratchpad} placeholder.
 MANUAL_REACT_PROMPT_TEMPLATE = """
 {base_prompt}
 
@@ -27,6 +27,11 @@ Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat N times)
 Thought: I now know the final answer
 Final Answer: the final answer to the original input question
+
+Begin!
+
+Question: {input}
+Thought:{agent_scratchpad}
 """
 
 class AgentCore:
@@ -39,11 +44,13 @@ class AgentCore:
             base_prompt_text = f.read()
 
         # STEP 3: Create the final prompt by injecting your persona.
+        # This template now correctly contains all required input_variables:
+        # {base_prompt}, {tools}, {tool_names}, {input}, {agent_scratchpad}
         self.prompt = PromptTemplate.from_template(MANUAL_REACT_PROMPT_TEMPLATE).partial(
             base_prompt=base_prompt_text
         )
 
-        # STEP 4: Create the agent and executor as before.
+        # STEP 4: Create the agent and executor. This will now succeed.
         agent = create_react_agent(self.llm, self.tools, self.prompt)
         self.agent_executor = AgentExecutor(
             agent=agent, 
@@ -55,7 +62,7 @@ class AgentCore:
     def _initialize_llms(self):
         """Initializes Gemini and Ollama models with a fallback mechanism."""
         try:
-            llm = ChatGoogleGenerativeAI(model="gemini-pro", google_api_key=config.GEMINI_API_KEY, convert_system_message_to_human=True)
+            llm = ChatGoogleGenerativeAI(model="gemini-2.5-pro", google_api_key=config.GEMINI_API_KEY, convert_system_message_to_human=True)
             logging.info("Successfully initialized Gemini Pro.")
             return llm, "gemini"
         except Exception as e:
@@ -66,7 +73,6 @@ class AgentCore:
 
     def _setup_tools(self):
         """Sets up the tools available to the agent."""
-        # This part remains the same
         tools = [
             Tool(name="SearchMemory", func=memory_handler.retrieve_memory, description="Use this tool to find information about the campus, events, faculty, or past conversations. It is the primary source of knowledge."),
             Tool(name="CallSecurity", func=api_triggers.call_security, description="Use this tool to dispatch security to a specified location in case of an emergency. Input should be the location as a string."),
@@ -78,6 +84,7 @@ class AgentCore:
     def run_query(self, query: str):
         """Processes a query through the agent."""
         try:
+            # We must pass the input in the correct variable name as expected by the prompt
             response = self.agent_executor.invoke({"input": query})
             memory_handler.store_interaction(query, response['output'])
             return {"response": response['output'], "source": self.source}
