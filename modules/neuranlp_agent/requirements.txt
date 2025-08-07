@@ -6,7 +6,7 @@ langchain-community
 openai-whisper
 chromadb
 tiktoken
-pyttsx3
+gTTS
 pydub
 requests
 python-dotenv

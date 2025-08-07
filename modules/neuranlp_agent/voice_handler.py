@@ -1,43 +1,54 @@
 import whisper
-import pyttsx3
 from pydub import AudioSegment
 import os
 import base64
+from gtts import gTTS
+import io
 
 class VoiceHandler:
+    """A class to handle both Speech-to-Text and Text-to-Speech operations."""
     def __init__(self):
+        print("Initializing VoiceHandler and loading Whisper model...")
+        # Whisper model is loaded only when this class is created
         self.whisper_model = whisper.load_model("base")
-        self.tts_engine = pyttsx3.init()
+        print("Whisper model loaded.")
 
     def voice_to_text(self, audio_file_path: str) -> str:
-        """Converts voice input to text using Whisper."""
+        """Converts voice input from an audio file to text using Whisper."""
         try:
-            # Convert to WAV if not already
-            if not audio_file_path.endswith(".wav"):
-                sound = AudioSegment.from_file(audio_file_path)
-                wav_path = "temp.wav"
-                sound.export(wav_path, format="wav")
-                audio_file_path = wav_path
-
-            result = self.whisper_model.transcribe(audio_file_path)
-            return result["text"]
+            sound = AudioSegment.from_file(audio_file_path)
+            wav_path = "temp_audio.wav"
+            sound.export(wav_path, format="wav")
+            result = self.whisper_model.transcribe(wav_path)
+            
+            if os.path.exists(wav_path):
+                os.remove(wav_path)
+                
+            return result.get("text", "")
         except Exception as e:
             print(f"Error in voice_to_text: {e}")
             return ""
 
-    def text_to_voice(self, text: str, output_path="response.mp3") -> str:
-        """Converts text response to speech and returns the base64 encoded audio."""
+    def text_to_voice(self, text: str) -> str:
+        """Converts text response to speech using gTTS and returns base64 encoded audio."""
         try:
-            self.tts_engine.save_to_file(text, output_path)
-            self.tts_engine.runAndWait()
-            
-            with open(output_path, "rb") as audio_file:
-                encoded_string = base64.b64encode(audio_file.read()).decode('utf-8')
-            
-            os.remove(output_path) # Clean up the audio file
+            tts = gTTS(text=text, lang='en')
+            fp = io.BytesIO()
+            tts.write_to_fp(fp)
+            fp.seek(0)
+            encoded_string = base64.b64encode(fp.read()).decode('utf-8')
             return encoded_string
         except Exception as e:
             print(f"Error in text_to_voice: {e}")
             return ""
 
-voice_handler = VoiceHandler()
+# --- The Singleton Pattern ---
+# This ensures that the heavy VoiceHandler is created only once, and only when first needed.
+_voice_handler_instance = None
+
+def get_voice_handler():
+    """Gets the single, shared instance of the VoiceHandler."""
+    global _voice_handler_instance
+    if _voice_handler_instance is None:
+        _voice_handler_instance = VoiceHandler()
+    return _voice_handler_instance
