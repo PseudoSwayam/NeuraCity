@@ -2,14 +2,15 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.llms import Ollama
 from langchain.prompts import PromptTemplate
 from langchain.agents import Tool, AgentExecutor, create_react_agent
+# Import the required types for safety settings
+from google.generativeai.types import HarmCategory, HarmBlockThreshold
+
 from .utils import config, api_triggers
 from .memory.memory_handler import memory_handler
 import logging
 
 logging.basicConfig(level=config.LOGGING_LEVEL)
 
-# STEP 1: Manually define the complete and correct prompt template.
-# This version now includes the required {agent_scratchpad} placeholder.
 MANUAL_REACT_PROMPT_TEMPLATE = """
 {base_prompt}
 
@@ -39,18 +40,13 @@ class AgentCore:
         self.llm, self.source = self._initialize_llms()
         self.tools = self._setup_tools()
         
-        # STEP 2: Read your custom persona from the file.
         with open("./modules/neuranlp_agent/prompts/base_prompt.txt") as f:
             base_prompt_text = f.read()
 
-        # STEP 3: Create the final prompt by injecting your persona.
-        # This template now correctly contains all required input_variables:
-        # {base_prompt}, {tools}, {tool_names}, {input}, {agent_scratchpad}
         self.prompt = PromptTemplate.from_template(MANUAL_REACT_PROMPT_TEMPLATE).partial(
             base_prompt=base_prompt_text
         )
 
-        # STEP 4: Create the agent and executor. This will now succeed.
         agent = create_react_agent(self.llm, self.tools, self.prompt)
         self.agent_executor = AgentExecutor(
             agent=agent, 
@@ -62,8 +58,18 @@ class AgentCore:
     def _initialize_llms(self):
         """Initializes Gemini and Ollama models with a fallback mechanism."""
         try:
-            llm = ChatGoogleGenerativeAI(model="gemini-2.5-pro", google_api_key=config.GEMINI_API_KEY, convert_system_message_to_human=True)
-            logging.info("Successfully initialized Gemini Pro.")
+            # THE FIX IS HERE 👇: Add safety settings to prevent the API from blocking emergency-related queries.
+            safety_settings = {
+                HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+            }
+
+            llm = ChatGoogleGenerativeAI(
+                model="gemini-2.5-pro", 
+                google_api_key=config.GEMINI_API_KEY, 
+                convert_system_message_to_human=True,
+                safety_settings=safety_settings
+            )
+            logging.info("Successfully initialized Gemini Pro with custom safety settings.")
             return llm, "gemini"
         except Exception as e:
             logging.warning(f"Failed to initialize Gemini, falling back to Ollama: {e}")
@@ -84,7 +90,6 @@ class AgentCore:
     def run_query(self, query: str):
         """Processes a query through the agent."""
         try:
-            # We must pass the input in the correct variable name as expected by the prompt
             response = self.agent_executor.invoke({"input": query})
             memory_handler.store_interaction(query, response['output'])
             return {"response": response['output'], "source": self.source}
