@@ -42,6 +42,11 @@ Each module or component lives in a dedicated folder:
     ```bash
     git push origin main
     ```
+5. **If Push shows error (Optional)**
+    ```bash
+    git pull --rebase origin main
+    ```
+    Again run the Step-4
 
 ---
 
