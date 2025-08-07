@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+langchain
+langchain-google-genai
+langchain-community
+openai-whisper
+chromadb
+tiktoken
+pyttsx3
+pydub
+requests
+python-dotenv
+ollama
