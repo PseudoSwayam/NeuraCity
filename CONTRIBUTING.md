@@ -46,7 +46,7 @@ Each module or component lives in a dedicated folder:
     ```bash
     git pull --rebase origin main
     ```
-    Again run the Step-4
+    **Again run the Step-4**
 
 ---
 
