@@ -11,3 +11,8 @@ pydub
 requests
 python-dotenv
 ollama
+
+# --- Dependencies for Unit Testing ---
+pytest
+pytest-asyncio
+httpx
