@@ -36,13 +36,13 @@ NeuraCity solves this by bringing together:
 NeuraCity/
 ├── backend/                            # FastAPI APIs, database models
 ├── frontend/                           # React + Tailwind or Streamlit dashboards
+├── memorycore/ 						# Vector memory logs
 ├── modules/                            # Independent modules (CV, NLP, IoT, etc.)
 │   ├── cv_watchtower/                  # Fall, loitering, lone female detection
 │   ├── reflex_system/                  # Autonomous response engine
 │   ├── neuranlp_agent/                 # GenAI chatbot + autonomous actions
 │   ├── iot_pulsenet/                   # Pulse, gas, IR sensors with triggers
 │   ├── insightcloud/                   # Attendance, sentiment, air quality dashboards
-│   ├── memorycore/                     # Vector memory logs
 │   ├── userhub/                        # Login/Logout, roles, presence               
 │   ├── alerts_and_notifications/       # Admin alerts, notices, push-to-announce
 │   └── neuromap/                       # Leaflet-based real-time campus map

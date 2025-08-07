@@ -1,12 +1,12 @@
+# File: modules/neuranlp_agent/agent_core.py
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.llms import Ollama
 from langchain.prompts import PromptTemplate
 from langchain.agents import Tool, AgentExecutor, create_react_agent
-# Import the required types for safety settings
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 
 from .utils import config, api_triggers
-from .memory.memory_handler import memory_handler
+from memorycore.memory_manager import get_memory_core
 import logging
 
 logging.basicConfig(level=config.LOGGING_LEVEL)
@@ -37,6 +37,8 @@ Thought:{agent_scratchpad}
 
 class AgentCore:
     def __init__(self):
+        self.memory_core = get_memory_core()
+
         self.llm, self.source = self._initialize_llms()
         self.tools = self._setup_tools()
         
@@ -58,13 +60,12 @@ class AgentCore:
     def _initialize_llms(self):
         """Initializes Gemini and Ollama models with a fallback mechanism."""
         try:
-            # THE FIX IS HERE 👇: Add safety settings to prevent the API from blocking emergency-related queries.
             safety_settings = {
                 HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
             }
 
             llm = ChatGoogleGenerativeAI(
-                model="gemini-2.5-pro", 
+                model="gemini-2.5-pro", # Use the stable gemini-pro model name
                 google_api_key=config.GEMINI_API_KEY, 
                 convert_system_message_to_human=True,
                 safety_settings=safety_settings
@@ -80,10 +81,34 @@ class AgentCore:
     def _setup_tools(self):
         """Sets up the tools available to the agent."""
         tools = [
-            Tool(name="SearchMemory", func=memory_handler.retrieve_memory, description="Use this tool to find information about the campus, events, faculty, or past conversations. It is the primary source of knowledge."),
-            Tool(name="CallSecurity", func=api_triggers.call_security, description="Use this tool to dispatch security to a specified location in case of an emergency. Input should be the location as a string."),
-            Tool(name="SendCampusAnnouncement", func=api_triggers.send_announcement, description="Use this tool to send a campus-wide announcement. This is for major alerts and requires authorization. Input should be the message as a string."),
-            Tool(name="NotifyDepartmentAdmin", func=lambda input_str: api_triggers.notify_admin(department=input_str.split(',')[0].strip(), message=''.join(input_str.split(',')[1:]).strip()), description="Use this tool to send a notification to a specific department's admin. The input must be a comma-separated string of two values: the target department and the message. Example: 'IT, The Wi-Fi in the main auditorium is down.'")
+            Tool(
+                name="SearchSharedVectorMemory", 
+                func=self.memory_core.vector.query, 
+                description="Use for semantic search of conversations and documents. Ideal for answering 'who', 'what', 'where', 'how' questions based on past knowledge."
+            ),
+            
+            # --- THE ONLY NEEDFUL CHANGE IS HERE ---
+            # Replace the simple Tool() constructor with Tool.from_function()
+            # This robustly tells the agent that the function expects a simple string input.
+            Tool.from_function(
+                func=api_triggers.call_security,
+                name="CallSecurity",
+                description="Use this tool to dispatch security to a specified location in case of an emergency. The input must be ONLY the location as a string (e.g., 'Main Library')."
+            ),
+            # --- All other tools remain unchanged ---
+            Tool(
+                name="SendCampusAnnouncement", 
+                func=api_triggers.send_announcement, 
+                description="Use this tool to send a campus-wide announcement. This is for major alerts and requires authorization. The input is the message string."
+            ),
+            Tool.from_function(
+                func=lambda input_str: api_triggers.notify_admin(
+                    department=input_str.split(',')[0].strip(),
+                    message=''.join(input_str.split(',')[1:]).strip()
+                ),
+                name="NotifyDepartmentAdmin",
+                description="Use this tool to send a notification to a specific department's admin. The input must be a single comma-separated string of two values: the target department and the message. Example: 'IT, The Wi-Fi in the main auditorium is down.'"
+            )
         ]
         return tools
 
@@ -91,10 +116,26 @@ class AgentCore:
         """Processes a query through the agent."""
         try:
             response = self.agent_executor.invoke({"input": query})
-            memory_handler.store_interaction(query, response['output'])
+
+            convo_text = f"User query: {query}\nAI response: {response['output']}"
+            metadata = {"query": query}
+            self.memory_core.vector.add(
+                source='neuranlp_agent',
+                type='conversation',
+                text_content=convo_text,
+                metadata=metadata
+            )
+            
             return {"response": response['output'], "source": self.source}
         except Exception as e:
             logging.error(f"Error running agent query: {e}")
             return {"response": "I'm sorry, I encountered an error and couldn't process your request.", "source": "error"}
 
-agent_core = AgentCore()
+
+def initialize_agent():
+    """Initializes agent and loads documents into the shared MemoryCore."""
+    core = get_memory_core()
+    core.load_external_documents(config.DOCUMENT_SOURCES)
+    return AgentCore()
+
+agent_core = initialize_agent()
