@@ -6,34 +6,50 @@ from .utils import config, api_triggers
 from .memory.memory_handler import memory_handler
 import logging
 
-# This is the required prompt structure for the ReAct agent.
-# It includes the placeholders {tool_names} and {tools} that the agent will fill.
-from langchain.agents.react.agent import AGENT_INSTRUCTIONS
-
 logging.basicConfig(level=config.LOGGING_LEVEL)
+
+# STEP 1: Manually define the prompt template that langchain-hub was providing.
+# This removes the need for the problematic dependency entirely.
+MANUAL_REACT_PROMPT_TEMPLATE = """
+{base_prompt}
+
+You have access to the following tools:
+
+{tools}
+
+Use the following format to answer the question:
+
+Question: the input question you must answer
+Thought: you should always think about what to do
+Action: the action to take, should be one of [{tool_names}]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
+Thought: I now know the final answer
+Final Answer: the final answer to the original input question
+"""
 
 class AgentCore:
     def __init__(self):
         self.llm, self.source = self._initialize_llms()
         self.tools = self._setup_tools()
         
-        # 1. Read the base persona from the file
+        # STEP 2: Read your custom persona from the file.
         with open("./modules/neuranlp_agent/prompts/base_prompt.txt") as f:
             base_prompt_text = f.read()
 
-        # 2. Construct the full prompt template required by the agent
-        prompt_string = base_prompt_text + "\n" + AGENT_INSTRUCTIONS
+        # STEP 3: Create the final prompt by injecting your persona.
+        self.prompt = PromptTemplate.from_template(MANUAL_REACT_PROMPT_TEMPLATE).partial(
+            base_prompt=base_prompt_text
+        )
 
-        self.prompt = PromptTemplate.from_template(prompt_string)
-
-        # 3. Create the agent and executor
-        #    The agent will automatically handle populating {tools} and {tool_names}
+        # STEP 4: Create the agent and executor as before.
         agent = create_react_agent(self.llm, self.tools, self.prompt)
         self.agent_executor = AgentExecutor(
             agent=agent, 
             tools=self.tools, 
             verbose=True,
-            handle_parsing_errors=True # Important for robustness
+            handle_parsing_errors="I'm sorry, I had trouble understanding my own thoughts. Could you please rephrase?"
         )
 
     def _initialize_llms(self):
@@ -50,28 +66,12 @@ class AgentCore:
 
     def _setup_tools(self):
         """Sets up the tools available to the agent."""
+        # This part remains the same
         tools = [
-            Tool(
-                name="SearchMemory",
-                func=memory_handler.retrieve_memory,
-                description="Use this tool to find information about the campus, events, faculty, or past conversations. It is the primary source of knowledge."
-            ),
-            Tool(
-                name="CallSecurity",
-                func=api_triggers.call_security,
-                description="Use this tool to dispatch security to a specified location in case of an emergency. Input should be the location as a string."
-            ),
-            Tool(
-                name="SendCampusAnnouncement",
-                func=api_triggers.send_announcement,
-                description="Use this tool to send a campus-wide announcement. This is for major alerts and requires authorization. Input should be the message as a string."
-            ),
-            Tool(
-                name="NotifyDepartmentAdmin",
-                # The lambda was a bit brittle, a dedicated function is better for agents.
-                func=lambda input_str: api_triggers.notify_admin(department=input_str.split(',')[0].strip(), message=input_str.split(',')[1].strip()),
-                description="Use this tool to send a notification to a specific department's admin. The input must be a comma-separated string of two values: the target department and the message. Example: 'IT, The Wi-Fi in the main auditorium is down.'"
-            )
+            Tool(name="SearchMemory", func=memory_handler.retrieve_memory, description="Use this tool to find information about the campus, events, faculty, or past conversations. It is the primary source of knowledge."),
+            Tool(name="CallSecurity", func=api_triggers.call_security, description="Use this tool to dispatch security to a specified location in case of an emergency. Input should be the location as a string."),
+            Tool(name="SendCampusAnnouncement", func=api_triggers.send_announcement, description="Use this tool to send a campus-wide announcement. This is for major alerts and requires authorization. Input should be the message as a string."),
+            Tool(name="NotifyDepartmentAdmin", func=lambda input_str: api_triggers.notify_admin(department=input_str.split(',')[0].strip(), message=''.join(input_str.split(',')[1:]).strip()), description="Use this tool to send a notification to a specific department's admin. The input must be a comma-separated string of two values: the target department and the message. Example: 'IT, The Wi-Fi in the main auditorium is down.'")
         ]
         return tools
 
