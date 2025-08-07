@@ -11,6 +11,7 @@ pydub
 requests
 python-dotenv
 ollama
+redis
 
 # --- Dependencies for Unit Testing ---
 pytest

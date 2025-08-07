@@ -109,24 +109,35 @@ The agent can ingest text documents to build its knowledge base.
 
 Ensure the docs/ directory exists in the NeuraCity root.
 Place relevant .txt files inside, such as campus_faq.txt and events_schedule.txt. The paths are configured in utils/config.py.
+---
+
 ▶️ Running the Application
-For local development, you need two terminals running simultaneously.
+For local development, you need three terminals running simultaneously.
 
-Terminal 1: Start the Mock Reflex System
-This server simulates the external ReflexSystem API, allowing you to test action-triggering.
-
+Terminal 1: Start Redis 
+Redis acts as our high-speed message broker for events.
 ```bash
-# In your NeuraCity root directory
-python3 mock_reflex_server.py
-This server will now be running at http://localhost:8001.
-
-Terminal 2: Start the NeuraNLP Agent
-This is the main application server.
-
-# In your NeuraCity root directory, with the neuranlp(venv) active
-uvicorn modules.neuranlp_agent.main:app --reload
-The agent is now live and accessible. You can view the interactive API documentation at http://localhost:8000/docs.
+# This command will run a Redis container in the background
+docker run -d --name redis-stack-server -p 6379:6379 redis/redis-stack-server:latest
 ```
+
+Terminal 2: Start the ReflexSystem
+This is the production-ready microservice that handles real-world actions.
+```bash
+# In your NeuraCity root directory, with (venv) active
+python3 -m uvicorn modules.reflex_system.main:app --host 0.0.0.0 --port 8001 --reload
+```
+The reflex_system is now running at http://localhost:8001.
+
+Terminal 3: Start the NeuraNLP Agent
+This is the main application server for our agent.
+```bash
+# In your NeuraCity root directory, with (venv) active
+python3 -m uvicorn modules.neuranlp_agent.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+The agent is now live. You can view the interactive API documentation at http://localhost:8000/docs.
+
 ---
 
 ## 📖 API Usage & Examples

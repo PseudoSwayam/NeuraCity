@@ -18,7 +18,7 @@ You have access to the following tools:
 
 {tools}
 
-Use the following format to answer the question:
+Use the following format:
 
 Question: the input question you must answer
 Thought: you should always think about what to do
@@ -26,10 +26,10 @@ Action: the action to take, should be one of [{tool_names}]
 Action Input: the input to the action
 Observation: the result of the action
 ... (this Thought/Action/Action Input/Observation can repeat N times)
-Thought: I now know the final answer
-Final Answer: the final answer to the original input question
+Thought: I now know the final answer and am ready to respond to the user.
+Final Answer: the final, conclusive answer to the original input question that will be shown to the user.
 
-Begin!
+Begin! After the final Observation, you MUST use the 'Thought' and 'Final Answer' format.
 
 Question: {input}
 Thought:{agent_scratchpad}
