@@ -1,11 +1,11 @@
 # File: memorycore/structured_memory.py
-# Handles all SQLite (Structured) memory operations.
 
 import sqlite3
 import json
 import datetime
 from typing import List, Dict, Any
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,6 @@ DB_PATH = 'memorycore/dbs/structured/neuracity_events.db'
 class StructuredMemory:
     """Manages the SQLite database for structured event logging."""
     def __init__(self, db_path: str = DB_PATH):
-        import os
         # Ensure the directory exists
         os.makedirs(os.path.dirname(db_path), exist_ok=True)
         
@@ -49,3 +48,25 @@ class StructuredMemory:
         )
         self.conn.commit()
         logger.info(f"[MemoryCore-Structured] Added structured event from '{source}'.")
+
+    # --- THIS IS THE ONLY ADDITION ---
+    # This new method is required by the `insightcloud` module to build its
+    # analytics cache. It does not change any of your existing, working code.
+    def get_recent_events(self, n: int = 1000) -> List[sqlite3.Row]:
+        """
+        Retrieves the 'n' most recent events from the database.
+        
+        Args:
+            n (int): The maximum number of events to return.
+            
+        Returns:
+            A list of sqlite3.Row objects, which behave like dictionaries.
+        """
+        try:
+            cursor = self.conn.cursor()
+            cursor.execute("SELECT * FROM events ORDER BY timestamp DESC LIMIT ?", (n,))
+            return cursor.fetchall()
+        except Exception as e:
+            logger.error(f"[MemoryCore-Structured] Failed to get recent events: {e}")
+            return []
+    # --- END ADDITION ---

@@ -16,6 +16,9 @@ ultralytics
 opencv-python
 numpy
 lap
+pandas
+scikit-learn
+aioredis
 
 # --- Dependencies for Unit Testing ---
 pytest
