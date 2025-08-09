@@ -33,7 +33,7 @@ API Client: httpx (for active health checks)
 ## 🔗 How It Integrates
 InsightCloud is a master aggregator and a perfect example of a decoupled microservice. It initiates connections but has no dependencies on the internal code of other modules.
 
-![System Architecture](diagram.svg)
+![System Architecture](diagram1.svg)
 
 ---
 
