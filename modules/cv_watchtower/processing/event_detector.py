@@ -2,7 +2,7 @@ import cv2
 import time
 import numpy as np
 from typing import List, Dict, Any
-from .utils.config import INTRUSION_ZONE, LOITERING_TIME_SECONDS, LOITERING_DISTANCE_THRESHOLD
+from ..utils.config import INTRUSION_ZONE, LOITERING_TIME_SECONDS, LOITERING_DISTANCE_THRESHOLD
 
 def detect_events(yolo_results, tracked_objects: Dict[int, Any]) -> List[Dict[str, Any]]:
     """

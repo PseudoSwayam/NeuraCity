@@ -1,17 +1,16 @@
-# File: modules/cv_watchtower/processing/stream_processor.py
-
 import cv2
 import time
 from ultralytics import YOLO
-from .utils.config import MODEL_PATH, DETECTION_CONFIDENCE_THRESHOLD, MPS_ENABLED
-from .processing import event_detector
-from .integrations import log_event_to_memorycore, trigger_reflex_alert
+from ..utils.config import MODEL_PATH, DETECTION_CONFIDENCE_THRESHOLD, MPS_ENABLED, EVENT_COOLDOWN_SECONDS
+from . import event_detector 
+
+from ..integrations import log_event_to_memorycore, trigger_reflex_alert
 import datetime
 
 class StreamProcessor:
     """
-
-    Manages the processing of a single video stream for event detection.
+    Manages the processing of a single video stream for event detection,
+    now with an event cooldown mechanism.
     """
     def __init__(self, camera_id: str, stream_source):
         self.camera_id = camera_id
@@ -19,62 +18,65 @@ class StreamProcessor:
         self.device = "mps" if MPS_ENABLED else "cpu"
         print(f"[Processor-{self.camera_id}] Initializing with device: {self.device}")
         
-        # Load the YOLOv8 model
         self.model = YOLO(MODEL_PATH)
-        
-        # State dictionary to track objects for loitering detection
         self.tracked_objects = {}
+        self.last_alert_times = {}
 
     def run(self):
         """Starts the video processing loop for this stream."""
+        print(f"[Processor-{self.camera_id}] Attempting to open video capture for source: '{self.stream_source}'")
         cap = cv2.VideoCapture(self.stream_source)
+        
         if not cap.isOpened():
-            print(f"[Processor-{self.camera_id}] ERROR: Cannot open video stream.")
+            # More explicit error logging
+            print(f"[Processor-{self.camera_id}] ERROR: cap.isOpened() returned False. The camera could not be accessed or the file path is incorrect.")
             return
 
-        print(f"[Processor-{self.camera_id}] Video stream opened. Starting detection...")
-        while True:
+        print(f"[Processor-{self.camera_id}] Video stream opened successfully. Starting detection loop...")
+        
+        while cap.isOpened(): # More robust loop condition
             success, frame = cap.read()
             if not success:
-                print(f"[Processor-{self.camera_id}] Stream ended. Looping...")
-                cap.set(cv2.CAP_PROP_POS_FRAMES, 0) # Loop video file
-                continue
+                print(f"[Processor-{self.camera_id}] Stream ended or failed to read frame.")
+                break # Exit loop if stream ends
 
             # Run YOLOv8 tracking on the frame
             results = self.model.track(
                 frame,
-                persist=True,        # Keep tracking the same objects
+                persist=True,
                 conf=DETECTION_CONFIDENCE_THRESHOLD,
-                device=self.device
+                device=self.device,
+                verbose=False # Quieter logs for cleaner output
             )
 
-            # Analyze results for high-level events
             detected_events = event_detector.detect_events(results, self.tracked_objects)
             
-            # If any events are detected, process them
             if detected_events:
-                self.handle_detected_events(detected_events, frame)
+                self.handle_detected_events(detected_events)
 
-            # (Optional) Display the annotated frame
-            # annotated_frame = results[0].plot()
-            # cv2.imshow(f"NeuraCity Watchtower - {self.camera_id}", annotated_frame)
-            # if cv2.waitKey(1) & 0xFF == ord("q"):
-            #     break
+            # Keep a small sleep to yield CPU if running very fast
+            time.sleep(0.01)
 
+        print(f"[Processor-{self.camera_id}] Releasing video capture.")
         cap.release()
-        # cv2.destroyAllWindows()
         
-    def handle_detected_events(self, events: list, frame):
-        """Processes a list of detected events by triggering alerts and logging."""
+    def handle_detected_events(self, events: list):
+        """Processes events, checking against a cooldown before triggering alerts."""
+        current_time = time.time()
+        
         for event in events:
-            # Add common metadata to the event
+            event_type = event['event_type']
+            
+            last_alert = self.last_alert_times.get(event_type, 0)
+            if (current_time - last_alert) < EVENT_COOLDOWN_SECONDS:
+                continue
+
+            self.last_alert_times[event_type] = current_time
+            
             event["camera_id"] = self.camera_id
             event["timestamp"] = datetime.datetime.now().isoformat()
             
-            print(f"[Processor-{self.camera_id}] DETECTED EVENT: {event['event_type']} with details: {event['details']}")
+            print(f"!!! [Processor-{self.camera_id}] TRIGGERING EVENT: {event['event_type']} with details: {event['details']}!!!")
             
-            # 1. Log every significant event to the MemoryCore
             log_event_to_memorycore(event)
-            
-            # 2. Trigger an immediate alert for critical events
             trigger_reflex_alert(event)

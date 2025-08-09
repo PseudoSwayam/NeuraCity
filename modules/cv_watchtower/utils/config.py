@@ -10,6 +10,7 @@ CAMERA_STREAMS = {
     "LobbyCam-01": 0,  # Use the default webcam
     #"Courtyard-File": "path/to/your/test_video.mp4" # Use a video file for testing
 }
+EVENT_COOLDOWN_SECONDS = 30.0
 
 # --- Event Detection Parameters ---
 # Intrusion Detection: Define a "restricted zone" as a list of points (x, y)

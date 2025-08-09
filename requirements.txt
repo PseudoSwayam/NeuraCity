@@ -15,6 +15,7 @@ redis
 ultralytics
 opencv-python
 numpy
+lap
 
 # --- Dependencies for Unit Testing ---
 pytest
