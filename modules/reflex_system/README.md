@@ -10,40 +10,7 @@ NeuraCity is built on a decoupled, microservices-style architecture. Each core f
 
 This design ensures scalability, maintainability, and resilience.
 
-```mermaid
-graph TD
-subgraph "User & Frontends"
-A["Campus Mobile/Web App"]
-end
-
-subgraph "Core AI Modules (Microservices)"
-    B["<b>neuranlp_agent (The Brain)</b><br>Listens on Port 8000<br>Processes user queries"]
-    C["<b>reflex_system (The Hands)</b><br>Listens on Port 8001<br>Executes real-world actions"]
-end
-
-subgraph "Infrastructure"
-    D["<b>Message Broker (Redis)</b><br>Pub/Sub Event Hub"]
-end
-
-subgraph "Event Consumers (Future)"
-    E["Admin Dashboard Service"]
-    F["Mobile Push Service"]
-end
-
-A -- "User Query (API)" --> B
-B -- "Triggers Action (API)" --> C
-C -- "Publishes Event" --> D
-D -- "Subscribes to Events" --> E
-D -- "Subscribes to Events" --> F
-
-%% Styling for better readability
-style A fill:#e6f3ff,stroke:#5a9bd5,stroke-width:2px
-style B fill:#fff2cc,stroke:#ffbf00,stroke-width:2px
-style C fill:#ffe6cc,stroke:#ff8c00,stroke-width:2px
-style D fill:#f2f2f2,stroke:#595959,stroke-width:2px,stroke-dasharray: 5 5
-style E fill:#e2f0d9,stroke:#70ad47,stroke-width:2px
-style F fill:#e2f0d9,stroke:#70ad47,stroke-width:2px
-```
+![System Architecture](diagram.svg)
 
 ---
 
