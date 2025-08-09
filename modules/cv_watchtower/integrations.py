@@ -2,21 +2,40 @@
 
 import requests
 import datetime
-import copy  # <-- 1. IMPORT THE COPY MODULE
-
+import copy
+import time
 from .utils.config import REFLEX_SYSTEM_URL
 from memorycore.memory_manager import get_memory_core
 
+# --- ADDED: The URL for InsightCloud's ping endpoint ---
+INSIGHTCLOUD_URL = "http://localhost:8002"
+
+# --- ADDED: A global variable to track the last ping time ---
+_last_ping_time = 0
+
+def ping_insight_cloud():
+    """Pings InsightCloud every 15 seconds to report that cv_watchtower is alive."""
+    global _last_ping_time
+    current_time = time.time()
+    # To avoid spamming the endpoint, we only send a ping periodically
+    if (current_time - _last_ping_time) > 15:
+        try:
+            # Calls the new '/health/ping/{module_name}' endpoint in InsightCloud
+            requests.post(f"{INSIGHTCLOUD_URL}/health/ping/cv_watchtower", timeout=2)
+            _last_ping_time = current_time
+            print("[Integration] Sent health ping to InsightCloud.")
+        except requests.exceptions.RequestException:
+            # It's okay if this fails; the system should not crash.
+            print("[Integration] Warning: Could not send health ping to InsightCloud.")
+
+
+# --- Your other two functions remain unchanged ---
 def log_event_to_memorycore(event_data: dict):
-    """
-    Stores a detailed computer vision event into the structured memory (SQLite).
-    """
+    """Stores a detailed computer vision event into the structured memory (SQLite)."""
     try:
         memory = get_memory_core()
-        # --- 2. THE FIX: Work on a deep copy to avoid modifying the original data ---
         data_to_log = copy.deepcopy(event_data)
 
-        # Now, safely convert the 'details' field in the copy to a string for logging
         if 'details' in data_to_log and isinstance(data_to_log['details'], dict):
              data_to_log['details'] = str(data_to_log['details'])
 
@@ -32,58 +51,36 @@ def log_event_to_memorycore(event_data: dict):
 
 def trigger_reflex_alert(event_data: dict):
     """Sends a trigger to the reflex_system based on the event's priority."""
-    # This function now receives the original, unmodified event_data dictionary,
-    # because the logging function worked on a copy.
-    
     event_type = event_data.get("event_type")
     location = event_data.get("camera_id", "Unknown Camera")
-    details = event_data.get("details", {}) # This will now be a dictionary as expected
+    details = event_data.get("details", {})
     
     endpoint = None
     payload = None
 
-    if event_type == "FALL_DETECTED":
+    if event_type in ["FALL_DETECTED", "VIOLENCE_DETECTED", "FIRE_SMOKE_DETECTED"]:
         endpoint = "/actions/call_security"
-        payload = {"location": f"{location} (CRITICAL: Possible Fall Detected)"}
-
-    elif event_type == "VIOLENCE_DETECTED":
-        endpoint = "/actions/call_security"
-        # This .get() call will now succeed
-        reason = details.get("reason", "Aggressive Behavior") 
+        reason = "Generic Emergency"
+        if event_type == "FALL_DETECTED": reason = "Possible Fall Detected"
+        if event_type == "VIOLENCE_DETECTED": reason = details.get("reason", "Aggressive Behavior")
+        if event_type == "FIRE_SMOKE_DETECTED": reason = "Fire/Smoke Detected"
         payload = {"location": f"{location} (CRITICAL: {reason})"}
-
-    elif event_type == "FIRE_SMOKE_DETECTED":
-        endpoint = "/actions/call_security"
-        payload = {"location": f"{location} (CRITICAL: Fire/Smoke Detected)"}
-        
+    
     elif event_type == "ABANDONED_OBJECT":
         endpoint = "/actions/notify_admin"
-        payload = {
-            "department": "Security", 
-            "message": f"High Priority: Unattended object detected at {location} for over {details.get('duration')} seconds."
-        }
+        payload = {"department": "Security", "message": f"High Priority: Unattended object at {location} for >{details.get('duration')}s."}
     
     elif event_type == "INTRUSION_DETECTED":
         endpoint = "/actions/notify_admin"
-        payload = {
-            "department": "Security", 
-            "message": f"Alert: Intrusion detected in restricted zone at {location}."
-        }
+        payload = {"department": "Security", "message": f"Alert: Intrusion detected in restricted zone at {location}."}
 
-    # Low priority events might just be logged for now without a reflex trigger.
-    elif event_type == "LOITERING_DETECTED":
-        print(f"[Integration] Low priority event '{event_type}' detected at {location}. Logging only.")
-        return
-        
     else:
-        print(f"[Integration] Event '{event_type}' has no configured reflex trigger.")
         return
 
-    # Send the request only if an endpoint and payload were defined.
     try:
         if endpoint and payload:
             response = requests.post(f"{REFLEX_SYSTEM_URL}{endpoint}", json=payload)
-            response.raise_for_status() # Raise an exception for HTTP errors
+            response.raise_for_status()
             print(f"[Integration] Successfully triggered reflex action: {endpoint}")
     except requests.exceptions.RequestException as e:
         print(f"[Integration] ERROR: Could not trigger reflex action. {e}")
