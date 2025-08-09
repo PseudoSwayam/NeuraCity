@@ -1,25 +1,38 @@
+# File: modules/cv_watchtower/utils/config.py
+
 # --- Model Configuration ---
-MODEL_PATH = "modules/cv_watchtower/models/yolov8n.pt"
-DETECTION_CONFIDENCE_THRESHOLD = 0.6  # Only detect objects with > 60% confidence
-MPS_ENABLED = True  # Set to True to use Apple Silicon GPU, False for CPU
+MODEL_PATH = "modules/cv_watchtower/models/yolov8n.pt" # Always use the efficient nano model now
+DETECTION_CONFIDENCE_THRESHOLD = 0.4
+MPS_ENABLED = True
 
-# --- Camera Stream Configuration ---
-# Add paths to video files or integer IDs for webcams (e.g., 0, 1)
-# Each entry is a tuple: (Camera ID/Name, Source Path)
-CAMERA_STREAMS = {
-    "LobbyCam-01": 0,  # Use the default webcam
-    #"Courtyard-File": "path/to/your/test_video.mp4" # Use a video file for testing
+# Use your MacBook's webcam for single-camera, real-time testing
+SINGLE_CAMERA_SOURCE = 0
+
+# Showcase mode uses 6 pre-recorded videos for a high-impact demo
+SHOWCASE_VIDEO_SOURCES = {
+    "Fall Cam": "videos/fall_test.mp4",
+    "Loitering Cam": "videos/loitering_test.mp4",
+    "Abandoned Bag Cam": "videos/abandoned_bag_test.mp4",
+    "Fight Cam": "videos/fight_test.mp4",
+    "Fire Cam": "videos/fire_test.mp4",
+    "Normal Activity Cam": "videos/normal_activity.mp4",
 }
-EVENT_COOLDOWN_SECONDS = 30.0
 
-# --- Event Detection Parameters ---
-# Intrusion Detection: Define a "restricted zone" as a list of points (x, y)
-# These example coordinates define a rectangle in the bottom-left corner of a 1280x720 frame.
-INTRUSION_ZONE = [(50, 600), (300, 600), (300, 700), (50, 700)]
+# --- Event Detection Parameters (Now tuned slightly differently for each mode) ---
+# Realistic, longer thresholds for single-camera mode
+LOITERING_TIME_REALISTIC = 10.0
+ABANDONED_OBJECT_TIME_REALISTIC = 20.0
 
-# Loitering Detection
-LOITERING_TIME_SECONDS = 10  # A person is "loitering" if they stay in the same area for 10s
-LOITERING_DISTANCE_THRESHOLD = 50  # ...within a 50-pixel radius
+# Lowered, faster thresholds for showcase mode
+LOITERING_TIME_SHOWCASE = 5.0
+ABANDONED_OBJECT_TIME_SHOWCASE = 7.0
 
-# --- Integration API Endpoints ---
+# General parameters (used by both modes)
+INTRUSION_ZONE = [(50, 600), (400, 600), (400, 720), (50, 720)]
+LOITERING_DISTANCE_THRESHOLD = 50
+FIRE_COLOR_THRESHOLD = 0.15
+FIRE_CHECK_AREA = [0, 0, 1280, 720]
+
+# --- Alerting & Integration ---
+EVENT_COOLDOWN_SECONDS = 15.0
 REFLEX_SYSTEM_URL = "http://localhost:8001/api"
