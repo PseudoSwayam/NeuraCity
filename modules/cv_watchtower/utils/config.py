@@ -8,7 +8,7 @@ MPS_ENABLED = True  # Set to True to use Apple Silicon GPU, False for CPU
 # Each entry is a tuple: (Camera ID/Name, Source Path)
 CAMERA_STREAMS = {
     "LobbyCam-01": 0,  # Use the default webcam
-    "Courtyard-File": "path/to/your/test_video.mp4" # Use a video file for testing
+    #"Courtyard-File": "path/to/your/test_video.mp4" # Use a video file for testing
 }
 
 # --- Event Detection Parameters ---

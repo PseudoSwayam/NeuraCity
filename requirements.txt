@@ -12,6 +12,9 @@ requests
 python-dotenv
 ollama
 redis
+ultralytics
+opencv-python
+numpy
 
 # --- Dependencies for Unit Testing ---
 pytest
