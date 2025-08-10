@@ -1,3 +1,4 @@
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
 # 🧠 NeuraCity — AI Nervous System for Smart Campuses
 
 NeuraCity is a full-stack, AI-first intelligent system designed to bring real-time awareness, safety, insights, and automation to physical institutions like college campuses, hospitals, airports, and smart cities.  
@@ -92,7 +93,7 @@ See CONTRIBUTING.md for contribution rules and folder ownership.
 
 ## 📄 License
 
-Licensed under the MIT License. See LICENSE for details.
+Licensed under the AGPLv3 License. See [LICENSE](./LICENSE) for details.
 
 ---
 

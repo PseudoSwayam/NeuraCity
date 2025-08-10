@@ -1,23 +1,28 @@
-## 📄 `LICENSE` (MIT License)
+NeuraCity — Ethical AI & Privacy License (Summary)
+--------------------------------------------------
+This project is licensed under the GNU Affero General Public License v3.0 (AGPLv3),
+with a commitment to transparency, user privacy, and ethical AI deployment.
 
-MIT License
+Core principles:
+1. All modified versions of NeuraCity, whether distributed or hosted as a service, 
+   must remain open-source under the same license.
+2. Any collection, storage, or processing of personal or sensor data using NeuraCity 
+   must follow privacy laws (e.g., GDPR, India's DPDP Act) and must clearly inform 
+   affected individuals.
+3. No use of NeuraCity is permitted for surveillance, profiling, or decision-making 
+   that violates human rights.
+4. Commercial use is allowed, but only if you share your modifications back to 
+   the community under AGPLv3.
 
-Copyright (c) 2025 Swayam Sahoo
+The full legal terms follow below.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the “Software”), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+--------------------------------------------------
+GNU AFFERO GENERAL PUBLIC LICENSE
+Version 3, 19 November 2007
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+Everyone is permitted to copy and distribute verbatim copies
+of this license document, but changing it is not allowed.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+[ FULL OFFICIAL AGPLv3 TEXT HERE — UNMODIFIED ]
+https://www.gnu.org/licenses/agpl-3.0.txt
