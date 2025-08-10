@@ -5,10 +5,7 @@ import json
 import aioredis
 from collections import Counter
 from .healthcheck import health_checker
-
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
-EVENT_CHANNEL = "campus_notifications"
+from utils.config_loader import settings
 
 class RealtimeAnalytics:
     """Manages the Redis subscription and updates live analytics data."""
@@ -26,9 +23,9 @@ class RealtimeAnalytics:
         """Starts the Redis subscription and returns the background task handle."""
         print("[Realtime] Starting Redis subscription...")
         try:
-            self.redis = await aioredis.from_url(f"redis://{REDIS_HOST}:{REDIS_PORT}")
+            self.redis = await aioredis.from_url(f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}")
             self.pubsub = self.redis.pubsub()
-            await self.pubsub.subscribe(EVENT_CHANNEL)
+            await self.pubsub.subscribe(settings.REDIS_EVENT_CHANNEL)
             
             task = asyncio.create_task(self._event_listener())
             print(f"[Realtime] Successfully subscribed to Redis channel: '{EVENT_CHANNEL}'")

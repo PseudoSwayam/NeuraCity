@@ -3,10 +3,7 @@
 import redis.asyncio as redis
 import json
 from .utils.logger import logger
-
-REDIS_HOST = "localhost"
-REDIS_PORT = 6379
-EVENT_CHANNEL = "campus_notifications"
+from utils.config_loader import settings
 
 class EventPublisher:
     _instance = None
@@ -17,8 +14,11 @@ class EventPublisher:
             cls._instance = super(EventPublisher, cls).__new__(cls)
             try:
                 # Add a health check to be more explicit about connection status
-                cls._redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, auto_close_connection_pool=False)
-                logger.info(f"Redis client initialized for {REDIS_HOST}:{REDIS_PORT}")
+                cls._redis_client = redis.Redis(
+                    host=settings.REDIS_HOST, 
+                    port=settings.REDIS_PORT, 
+                    auto_close_connection_pool=False)
+                logger.info(f"Redis connection pool established to {settings.REDIS_HOST}:{settings.REDIS_PORT}")
             except Exception as e:
                 logger.error(f"FATAL: Could not create Redis client: {e}")
                 cls._redis_client = None
@@ -49,8 +49,8 @@ class EventPublisher:
         try:
             message_json = json.dumps(event_message)
             # The publish command returns the number of clients that received the message.
-            num_clients = await self._redis_client.publish(EVENT_CHANNEL, message_json)
-            logger.info(f"Published event '{event_type}' to '{EVENT_CHANNEL}'. Message received by {num_clients} client(s).")
+            num_clients = await self._redis_client.publish(settings.REDIS_EVENT_CHANNEL, message_json)
+            logger.info(f"Published event '{event_type}' to '{settings.REDIS_EVENT_CHANNEL}'. Message received by {num_clients} client(s).")
         except Exception as e:
             logger.error(f"Failed to publish event to Redis: {e}")
 

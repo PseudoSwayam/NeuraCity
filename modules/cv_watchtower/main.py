@@ -10,6 +10,8 @@ import cv2
 import numpy as np
 import time
 import argparse
+from .utils import config as module_config
+from utils.config_loader import settings
 from .utils import config
 from ultralytics import YOLO
 from .processing import event_detector
@@ -58,7 +60,7 @@ if __name__ == "__main__":
         camera_sources, loitering_time, abandoned_time = {"MyWebcam": config.SINGLE_CAMERA_SOURCE}, config.LOITERING_TIME_REALISTIC, config.ABANDONED_OBJECT_TIME_REALISTIC
     
     device = "mps" if config.MPS_ENABLED else "cpu"
-    model = YOLO(config.MODEL_PATH)
+    model = YOLO(module_config.MODEL_PATH)
     caps = {cam_id: cv2.VideoCapture(source) for cam_id, source in camera_sources.items()}
 
     person_tracker, object_tracker, last_alert_times, current_frames = {}, {}, {}, {}

@@ -15,7 +15,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Your other imports are also perfect and unchanged
-from .utils.config import REDIS_HOST, REDIS_PORT, EVENT_CHANNEL
+from utils.config_loader import settings
 from .event_processor import EventProcessor
 from .channels.websocket_manager import websocket_manager
 
@@ -85,10 +85,10 @@ async def redis_listener():
     processor = EventProcessor()
     redis = None
     try:
-        redis = await aioredis.from_url(f"redis://{REDIS_HOST}:{REDIS_PORT}")
+        redis = await aioredis.from_url(f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}")
         pubsub = redis.pubsub()
-        await pubsub.subscribe(EVENT_CHANNEL)
-        print(f"[Alerts Main] Successfully subscribed to Redis channel '{EVENT_CHANNEL}'. Waiting for events...")
+        await pubsub.subscribe(settings.REDIS_EVENT_CHANNEL)
+        print(f"[Alerts Main] Successfully subscribed to Redis channel '{settings.REDIS_EVENT_CHANNEL}'. Waiting for events...")
 
         async for message in pubsub.listen():
             if message["type"] == "message":

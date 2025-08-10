@@ -4,8 +4,9 @@ from langchain_community.llms import Ollama
 from langchain.prompts import PromptTemplate
 from langchain.agents import Tool, AgentExecutor, create_react_agent
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
-
-from .utils import config, api_triggers
+from .utils import config
+from utils.config_loader import settings
+from .utils import api_triggers 
 from memorycore.memory_manager import get_memory_core
 import logging
 
@@ -66,7 +67,7 @@ class AgentCore:
 
             llm = ChatGoogleGenerativeAI(
                 model="gemini-2.5-pro", # Use the stable gemini-pro model name
-                google_api_key=config.GEMINI_API_KEY, 
+                google_api_key=settings.GEMINI_API_KEY, 
                 convert_system_message_to_human=True,
                 safety_settings=safety_settings
             )
@@ -74,8 +75,8 @@ class AgentCore:
             return llm, "gemini"
         except Exception as e:
             logging.warning(f"Failed to initialize Gemini, falling back to Ollama: {e}")
-            llm = Ollama(base_url=config.OLLAMA_BASE_URL, model=config.OLLAMA_MODEL)
-            logging.info(f"Using Ollama with model {config.OLLAMA_MODEL}.")
+            llm = Ollama(base_url=settings.OLLAMA_BASE_URL, model=settings.OLLAMA_MODEL)
+            logging.info(f"Using Ollama with model {settings.OLLAMA_MODEL}.")
             return llm, "ollama"
 
     def _setup_tools(self):

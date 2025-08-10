@@ -4,7 +4,7 @@ import requests
 import datetime
 import copy
 import time
-from .utils.config import REFLEX_SYSTEM_URL
+from utils.config_loader import settings
 from memorycore.memory_manager import get_memory_core
 
 # --- ADDED: The URL for InsightCloud's ping endpoint ---
@@ -21,7 +21,7 @@ def ping_insight_cloud():
     if (current_time - _last_ping_time) > 15:
         try:
             # Calls the new '/health/ping/{module_name}' endpoint in InsightCloud
-            requests.post(f"{INSIGHTCLOUD_URL}/health/ping/cv_watchtower", timeout=2)
+            requests.post(f"{settings.INSIGHTCLOUD_HOST}/health/ping/cv_watchtower", timeout=2)
             _last_ping_time = current_time
             print("[Integration] Sent health ping to InsightCloud.")
         except requests.exceptions.RequestException:
@@ -79,7 +79,7 @@ def trigger_reflex_alert(event_data: dict):
 
     try:
         if endpoint and payload:
-            response = requests.post(f"{REFLEX_SYSTEM_URL}{endpoint}", json=payload)
+            response = requests.post(f"{settings.REFLEX_API_BASE_URL}{endpoint}", json=payload)
             response.raise_for_status()
             print(f"[Integration] Successfully triggered reflex action: {endpoint}")
     except requests.exceptions.RequestException as e:
