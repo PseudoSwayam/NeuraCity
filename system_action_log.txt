@@ -354,3 +354,4 @@
 2025-08-11T00:45:43.832932 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Abandoned Bag Cam (CRITICAL: Aggressive Movement)
 2025-08-11T00:45:46.605995 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Normal Activity Cam (CRITICAL: Aggressive Movement)
 2025-08-11T00:46:09.071763 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Aggressive Movement)
+2025-08-11T02:15:49.117714 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Aggressive Movement)
