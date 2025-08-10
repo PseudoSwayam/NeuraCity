@@ -93,7 +93,7 @@ See CONTRIBUTING.md for contribution rules and folder ownership.
 
 ## 📄 License
 
-Licensed under the AGPLv3 License. See [LICENSE](./LICENSE) for details.
+Licensed under the AGPLv3 License. See [LICENSE](./LICENSE) & [NOTICE](./NOTICE) for details.
 
 ---
 

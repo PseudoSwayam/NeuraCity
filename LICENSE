@@ -1,28 +1,29 @@
-NeuraCity — Ethical AI & Privacy License (Summary)
---------------------------------------------------
-This project is licensed under the GNU Affero General Public License v3.0 (AGPLv3),
-with a commitment to transparency, user privacy, and ethical AI deployment.
-
-Core principles:
-1. All modified versions of NeuraCity, whether distributed or hosted as a service, 
-   must remain open-source under the same license.
-2. Any collection, storage, or processing of personal or sensor data using NeuraCity 
-   must follow privacy laws (e.g., GDPR, India's DPDP Act) and must clearly inform 
-   affected individuals.
-3. No use of NeuraCity is permitted for surveillance, profiling, or decision-making 
-   that violates human rights.
-4. Commercial use is allowed, but only if you share your modifications back to 
-   the community under AGPLv3.
-
-The full legal terms follow below.
-
---------------------------------------------------
 GNU AFFERO GENERAL PUBLIC LICENSE
 Version 3, 19 November 2007
 
-Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+Copyright (C) 2025 Swayam Sahoo
+
 Everyone is permitted to copy and distribute verbatim copies
 of this license document, but changing it is not allowed.
 
-[ FULL OFFICIAL AGPLv3 TEXT HERE — UNMODIFIED ]
+[Full AGPLv3 License Text Below]
+
+---
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+---
+
+[Full AGPLv3 legal text continues here, you can copy directly from:]
 https://www.gnu.org/licenses/agpl-3.0.txt

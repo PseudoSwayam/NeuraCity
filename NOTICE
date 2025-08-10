@@ -1,0 +1,20 @@
+NeuraCity - Intelligent AI-Driven Urban Safety & Monitoring System
+Copyright (C) 2025 Swayam Sahoo
+
+This product includes modules:
+- NeuraNLP Agent
+- Reflex System
+- MemoryCore
+- CV Watchtower
+- InsightCloud
+- IoT PulseNet
+- Neuromap
+- UserHub
+
+Custom Notices & Conditions:
+1. This project is licensed under the GNU Affero General Public License v3.0 (AGPLv3).
+2. Any modified version made available over a network must also provide source code under the same license.
+3. Branding (NeuraCity logo, name) must be preserved in derivative works unless explicit permission is given.
+4. The project includes third-party libraries, each retaining their own licenses.
+
+For full license details, see [LICENSE](./LICENSE).
