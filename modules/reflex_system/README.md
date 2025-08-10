@@ -1,7 +1,6 @@
 # 🦾 Reflex System: The AIOps Engine of NeuraCity
 
 > The autonomous action, event-publishing, and self-monitoring engine of the NeuraCity Smart Campus platform.
-> Co-created by Swayam and his wife.
 
 The `reflex_system` is a dedicated microservice that acts as the hands and central nervous system of the NeuraCity platform. Its primary role is to receive authenticated commands from other modules (like `neuranlp_agent` or `cv_watchtower`) and execute them as real-world actions.
 
