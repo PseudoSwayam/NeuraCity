@@ -19,6 +19,7 @@ lap
 pandas
 scikit-learn
 aioredis
+websockets
 
 # --- Dependencies for Unit Testing ---
 pytest

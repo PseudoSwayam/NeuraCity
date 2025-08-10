@@ -22,8 +22,13 @@ async def handle_security_call(location: str, source_module: Optional[str] = "un
     get_memory_core().structured.add("reflex_system", "security_alert", event_details)
     event_type = "CV_SECURITY_ALERT" if "CRITICAL" in location else "NLP_SECURITY_ALERT"
 
+    camera_id = None
+    if source_module == 'cv_watchtower' and '(' in location:
+        camera_id = location.split(' (')[0]
+
     event_payload = {
         "location": location,
+        "camera_id": camera_id,
         "timestamp": datetime.datetime.now().isoformat(),
         "triggered_by": source_module
     }
