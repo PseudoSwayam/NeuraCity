@@ -67,6 +67,14 @@ async def websocket_endpoint(websocket: WebSocket):
         websocket_manager.disconnect(websocket)
         print(f"[WebSocket] Client disconnected cleanly.")
 
+@app.get("/", summary="Health Check")
+def health_check():
+    """Provides a simple health check for the system."""
+    # We check the Redis listener task to make sure the core process is running.
+    if app.state.redis_listener_task and not app.state.redis_listener_task.done():
+        return {"status": "ok", "redis_listener": "active"}
+    else:
+        return {"status": "error", "redis_listener": "inactive"}
 
 # --- Your perfect Redis listener logic is unchanged ---
 async def redis_listener():

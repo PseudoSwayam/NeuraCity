@@ -19,6 +19,7 @@ class HealthCheck:
                 'neuranlp_agent': {"type": "server", "url": "http://localhost:8000/health", "last_seen": 0.0, "status": "Unknown"},
                 'reflex_system':  {"type": "server", "url": "http://localhost:8001/", "last_seen": 0.0, "status": "Unknown"},
                 'insightcloud':   {"type": "server", "url": "http://localhost:8002/docs", "last_seen": 0.0, "status": "Unknown"},
+                'alerts_and_notifications': {"type": "server", "url": "http://localhost:8003/", "last_seen": 0.0, "status": "Unknown"},
                 'cv_watchtower':  {"type": "event_driven", "last_seen": 0.0, "status": "Unknown"},
                 'iot_pulsenet':   {"type": "event_driven", "last_seen": 0.0, "status": "Unknown"}
             }
