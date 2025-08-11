@@ -20,7 +20,13 @@ async def handle_security_call(location: str, source_module: Optional[str] = "un
 
     event_details = {"location": location, "status": "dispatched"}
     get_memory_core().structured.add("reflex_system", "security_alert", event_details)
-    event_type = "CV_SECURITY_ALERT" if "CRITICAL" in location else "NLP_SECURITY_ALERT"
+    event_type = "GENERIC_SECURITY_ALERT"
+    if source_module == 'cv_watchtower':
+        event_type = "CV_SECURITY_ALERT"
+    elif source_module == 'neuranlp_agent':
+        event_type = "NLP_SECURITY_ALERT"
+    elif source_module == 'iot_pulsenet':
+        event_type = "IOT_SECURITY_ALERT"
 
     camera_id = None
     if source_module == 'cv_watchtower' and '(' in location:
