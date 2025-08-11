@@ -1,7 +1,4 @@
-# File: iot_pulsenet.py
-# The intelligent, edge-processing IoT module for NeuraCity, running on a Raspberry Pi Pico W.
-# This version processes data locally and only contacts the backend for critical events.
-# Co-created by Swayam and his wife.
+# File: modules/iot_pulsenet/main.py
 
 import uasyncio as asyncio
 import time
