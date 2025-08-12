@@ -1,7 +1,6 @@
 # ⚡ IoT PulseNet Module
 
 > The Real-Time IoT Sensor and Edge Intelligence Node for the NeuraCity Platform.
-> Co-created by Swayam and his wife.
 
 The `iot_pulsenet` module is a complete, standalone MicroPython application designed to run on a **Raspberry Pi Pico W**. It acts as an intelligent "edge" device, continuously monitoring a suite of environmental and biometric sensors.
 
