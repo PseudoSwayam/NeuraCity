@@ -382,3 +382,8 @@
 2025-08-13T01:32:07.204412 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Abandoned Bag Cam (CRITICAL: Aggressive Movement)
 2025-08-13T01:32:10.299466 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Normal Activity Cam (CRITICAL: Aggressive Movement)
 2025-08-13T01:32:10.718818 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Fire/Smoke Detected)
+2025-08-13T01:38:33.644115 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Aggressive Movement)
+2025-08-13T01:38:44.827042 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Fire/Smoke Detected)
+2025-08-13T01:38:46.618438 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fall Cam (CRITICAL: Aggressive Movement)
+2025-08-13T01:38:47.287286 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fight Cam (CRITICAL: Aggressive Movement)
+2025-08-13T01:43:19.883428 - [DEPT NOTIFICATION] Sent to HealthAndSafety: Alert from Iot_pulsenet-01: heart_rate_high - {"bpm": 146}
