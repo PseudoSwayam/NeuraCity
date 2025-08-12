@@ -65,6 +65,8 @@ const locations = {
   "Fire Cam": [40.7150, -74.0070],
   "Entrance-01": [40.7138, -74.0040],
   "Normal Activity Cam": [40.7138, -74.0040],
+  "Main Gate": [40.7130, -74.0035],
+  "Main Library": [40.7128, -74.0075],
   "Iot_pulsenet-01": [40.7140, -74.0060]
 };
 
