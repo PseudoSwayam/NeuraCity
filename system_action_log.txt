@@ -389,3 +389,21 @@
 2025-08-13T01:43:19.883428 - [DEPT NOTIFICATION] Sent to HealthAndSafety: Alert from Iot_pulsenet-01: heart_rate_high - {"bpm": 146}
 2025-08-13T01:58:43.561760 - [CAMPUS ANNOUNCEMENT] Broadcasted: The main library will have extended hours, remaining open 24/7, for the upcoming finals week. Good luck with your studies
 2025-08-13T02:06:10.465642 - [CAMPUS ANNOUNCEMENT] Broadcasted: The main library will be closing today at 5 P.M.
+2025-08-13T02:29:48.355190 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:29:59.244328 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Fire/Smoke Detected)
+2025-08-13T02:30:00.686411 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fall Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:30:01.279910 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fight Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:30:10.714046 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Abandoned Bag Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:30:13.541480 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Normal Activity Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:30:31.406943 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:30:42.212771 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Normal Activity Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:47:01.562944 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:47:12.177650 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Fire/Smoke Detected)
+2025-08-13T02:47:13.644650 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fall Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:47:14.270077 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fight Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:47:23.945322 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Abandoned Bag Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:47:26.585060 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Normal Activity Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:49:14.087471 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:49:25.064640 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Fire/Smoke Detected)
+2025-08-13T02:49:26.808588 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fall Cam (CRITICAL: Aggressive Movement)
+2025-08-13T02:49:27.552833 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fight Cam (CRITICAL: Aggressive Movement)

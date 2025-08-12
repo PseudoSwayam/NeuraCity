@@ -80,23 +80,3 @@ def find_anomalies() -> List[Dict]:
         "event_count": int(row['count']),
         "details": "Unusually high number of events detected in this hour."
     } for _, row in anomalies.iterrows()]
-
-def get_events_in_range(start_iso: str, end_iso: str) -> List[Dict]:
-    """
-    Filters and returns all events from the cache that fall within a
-    given ISO 8601 timestamp range. Also enriches events with location data.
-    """
-    if DATA_CACHE.empty:
-        return []
-    
-    # Convert ISO strings to datetime objects for comparison
-    start_time = pd.to_datetime(start_iso)
-    end_time = pd.to_datetime(end_iso)
-    
-    # Filter the DataFrame based on the time range
-    time_filtered_df = DATA_CACHE[
-        (DATA_CACHE['timestamp'] >= start_time) & (DATA_CACHE['timestamp'] <= end_time)
-    ]
-
-    # Convert the filtered DataFrame back to a list of dictionaries for the API
-    return time_filtered_df.to_dict('records')
