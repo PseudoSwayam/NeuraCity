@@ -57,6 +57,7 @@ def trigger_reflex_alert(event_data: dict):
     
     endpoint = None
     payload = None
+    source_module = "cv_watchtower"
 
     if event_type in ["FALL_DETECTED", "VIOLENCE_DETECTED", "FIRE_SMOKE_DETECTED"]:
         endpoint = "/actions/call_security"
@@ -64,15 +65,15 @@ def trigger_reflex_alert(event_data: dict):
         if event_type == "FALL_DETECTED": reason = "Possible Fall Detected"
         if event_type == "VIOLENCE_DETECTED": reason = details.get("reason", "Aggressive Behavior")
         if event_type == "FIRE_SMOKE_DETECTED": reason = "Fire/Smoke Detected"
-        payload = {"location": f"{location} (CRITICAL: {reason})"}
+        payload = {"location": f"{location} (CRITICAL: {reason})", "source_module": source_module}
     
     elif event_type == "ABANDONED_OBJECT":
         endpoint = "/actions/notify_admin"
-        payload = {"department": "Security", "message": f"High Priority: Unattended object at {location} for >{details.get('duration')}s."}
+        payload = {"department": "Security", "message": f"High Priority: Unattended object at {location} for >{details.get('duration')}s.", "source_module": source_module}
     
     elif event_type == "INTRUSION_DETECTED":
         endpoint = "/actions/notify_admin"
-        payload = {"department": "Security", "message": f"Alert: Intrusion detected in restricted zone at {location}."}
+        payload = {"department": "Security", "message": f"Alert: Intrusion detected in restricted zone at {location}.", "source_module": source_module}
 
     else:
         return

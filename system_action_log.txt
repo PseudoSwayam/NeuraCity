@@ -366,3 +366,19 @@
 2025-08-12T13:02:05.607479 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
 2025-08-12T13:12:06.076097 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
 2025-08-12T13:26:47.658309 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-12T23:45:52.472161 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Aggressive Movement)
+2025-08-12T23:53:54.900156 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Lab-01 building
+2025-08-13T00:13:16.891088 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Lab-01 building
+2025-08-13T00:30:21.890006 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Lab-01 building
+2025-08-13T00:30:32.375035 - [CAMPUS ANNOUNCEMENT] Broadcasted: Emergency Alert: A fire has been reported in the Lab-01 building. Please evacuate the area immediately and avoid the building until further notice.
+2025-08-13T01:03:33.133984 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: lab-01
+2025-08-13T01:20:41.044463 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: lab-01
+2025-08-13T01:25:56.264281 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: lab-01
+2025-08-13T01:30:45.779763 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: lab-01
+2025-08-13T01:31:43.045585 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Aggressive Movement)
+2025-08-13T01:31:54.614810 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Fire/Smoke Detected)
+2025-08-13T01:31:56.333283 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fall Cam (CRITICAL: Aggressive Movement)
+2025-08-13T01:31:57.074120 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fight Cam (CRITICAL: Aggressive Movement)
+2025-08-13T01:32:07.204412 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Abandoned Bag Cam (CRITICAL: Aggressive Movement)
+2025-08-13T01:32:10.299466 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Normal Activity Cam (CRITICAL: Aggressive Movement)
+2025-08-13T01:32:10.718818 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Fire/Smoke Detected)
