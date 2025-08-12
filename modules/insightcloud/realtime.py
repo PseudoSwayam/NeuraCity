@@ -28,7 +28,7 @@ class RealtimeAnalytics:
             await self.pubsub.subscribe(settings.REDIS_EVENT_CHANNEL)
             
             task = asyncio.create_task(self._event_listener())
-            print(f"[Realtime] Successfully subscribed to Redis channel: '{EVENT_CHANNEL}'")
+            print(f"[Realtime] Successfully subscribed to Redis channel: '{settings.REDIS_EVENT_CHANNEL}'")
             return task
         except Exception as e:
             print(f"[Realtime] FATAL: Could not subscribe to Redis. Live analytics disabled. {e}")

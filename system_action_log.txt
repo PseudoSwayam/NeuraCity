@@ -363,3 +363,6 @@
 2025-08-12T01:28:39.229451 - [DEPT NOTIFICATION] Sent to HealthAndSafety: Alert from Iot_pulsenet-01: heart_rate_high - {"bpm": 195}
 2025-08-12T01:30:56.443536 - [DEPT NOTIFICATION] Sent to HealthAndSafety: Alert from Iot_pulsenet-01: heart_rate_high - {"bpm": 195}
 2025-08-12T01:31:58.136720 - [DEPT NOTIFICATION] Sent to HealthAndSafety: Alert from Iot_pulsenet-01: heart_rate_high - {"bpm": 194}
+2025-08-12T13:02:05.607479 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-12T13:12:06.076097 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-12T13:26:47.658309 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.

@@ -16,6 +16,7 @@ SENSOR_ID = "Iot_pulsenet-01"  # Give each device a unique name
 YOUR_IP = "192.xxx.x.xxx"
 REFLEX_API_URL_NOTIFY = f"http://{YOUR_IP}:8001/api/actions/notify_admin"
 REFLEX_API_URL_SECURITY = f"http://{YOUR_IP}:8001/api/actions/call_security"
+INSIGHTCLOUD_API_URL = f"http://{YOUR_IP}:8002/health/ping/iot_pulsenet"
 
 
 # ---------- HARDWARE & THRESHOLD CONFIGURATION ----------
@@ -184,6 +185,31 @@ async def task_mq2():
         await asyncio.sleep(1)
 
 # ---------- SYSTEM TASKS (INTEGRATION & DISPLAY) ----------
+async def task_health_pinger():
+    """
+    Periodically sends a heartbeat to InsightCloud to report that this
+    IoT device is alive and operational. Runs in the background.
+    """
+
+    # Wait for WiFi to connect before starting
+    while not wlan.isconnected():
+        await asyncio.sleep(5)
+        
+    while True:
+        try:
+            print("Sending health ping to InsightCloud...")
+            response = urequests.post(INSIGHTCLOUD_API_URL, timeout=5)
+            if response.status_code == 200:
+                print("Health ping ACK.")
+            else:
+                print(f"Health ping failed. Status: {response.status_code}")
+            response.close()
+        except Exception as e:
+            print(f"Health ping failed. Exception: {e}")
+        
+        # Send a ping every 30 seconds
+        await asyncio.sleep(30)
+
 async def task_event_consumer():
     """Consumes critical events and sends them to the NeuraCity backend."""
     while True:
@@ -265,7 +291,7 @@ async def main():
     if oled: oled.fill(0); oled.text("Booting...", 0, 28); oled.show()
     await connect_to_wifi()
     
-    tasks = [ task_event_consumer(), task_mq2(), task_oled_dashboard() ]
+    tasks = [ task_event_consumer(), task_mq2(), task_oled_dashboard(), task_health_pinger() ]
     if bme: tasks.append(task_bme())
     if max_sensor: tasks.append(task_max30102())
     
