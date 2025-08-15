@@ -1,7 +1,7 @@
 # File: modules/userhub/app.py
 from fastapi import FastAPI
 from .database import Base, engine
-from .routers import auth, users
+from .routers import auth, users, attendance
 
 # This will create the database tables if they don't exist, but Alembic is preferred.
 # Base.metadata.create_all(bind=engine)
@@ -15,6 +15,7 @@ app = FastAPI(
 # Include the routers
 app.include_router(auth.router)
 app.include_router(users.router)
+app.include_router(attendance.router)
 
 @app.get("/")
 def read_root():

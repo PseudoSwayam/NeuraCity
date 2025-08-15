@@ -9,6 +9,7 @@ from utils.config_loader import settings
 from .utils import api_triggers 
 from memorycore.memory_manager import get_memory_core
 import logging
+from langchain.memory import ConversationBufferMemory
 
 logging.basicConfig(level=config.LOGGING_LEVEL)
 
@@ -82,21 +83,21 @@ class AgentCore:
     def _setup_tools(self):
         """Sets up the tools available to the agent."""
         tools = [
+            Tool.from_function(
+                func=api_triggers.get_on_campus_users,
+                name="CheckCampusAttendance",
+                description="Use this tool to find out which users (students or staff) are currently present or checked-in on campus. It does not take any input."
+            ),
             Tool(
                 name="SearchSharedVectorMemory", 
                 func=self.memory_core.vector.query, 
                 description="Use for semantic search of conversations and documents. Ideal for answering 'who', 'what', 'where', 'how' questions based on past knowledge."
             ),
-            
-            # --- THE ONLY NEEDFUL CHANGE IS HERE ---
-            # Replace the simple Tool() constructor with Tool.from_function()
-            # This robustly tells the agent that the function expects a simple string input.
             Tool.from_function(
                 func=api_triggers.call_security,
                 name="CallSecurity",
                 description="Use this tool to dispatch security to a specified location in case of an emergency. The input must be ONLY the location as a string (e.g., 'Main Library')."
             ),
-            # --- All other tools remain unchanged ---
             Tool(
                 name="SendCampusAnnouncement", 
                 func=api_triggers.send_announcement, 

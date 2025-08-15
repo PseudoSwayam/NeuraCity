@@ -3,6 +3,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional
 from .models import UserRole
+import datetime
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -26,3 +27,18 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     email: Optional[EmailStr] = None
+
+class AttendanceLogBase(BaseModel):
+    user_id: int
+    location: str
+
+class AttendanceCheckIn(AttendanceLogBase):
+    pass # Status will be set by the endpoint
+
+class AttendanceLog(AttendanceLogBase):
+    id: int
+    timestamp: datetime.datetime
+    status: str
+
+    class Config:
+        from_attributes = True

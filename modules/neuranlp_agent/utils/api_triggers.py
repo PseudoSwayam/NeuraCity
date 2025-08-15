@@ -68,3 +68,22 @@ def notify_admin(department: str, message: str) -> dict:
     except requests.exceptions.RequestException as e:
         logging.error(f"Failed to notify admin: {e}")
         return {"error": str(e)}
+
+
+def get_on_campus_users() -> str:
+    """
+    Makes an API call to UserHub to get a list of all users
+    who are currently checked in.
+    """
+    api_url = f"{settings.USERHUB_HOST}/attendance/on-campus"
+    try:
+        response = requests.get(api_url, timeout=5)
+        response.raise_for_status()
+        users = response.json()
+        if not users:
+            return "No users are currently checked in on campus."
+        # Format the response for the LLM
+        user_names = [user['full_name'] for user in users]
+        return f"The following users are currently on campus: {', '.join(user_names)}."
+    except requests.exceptions.RequestException as e:
+        return f"Failed to get attendance data: {e}"
