@@ -16,24 +16,16 @@ logging.basicConfig(level=config.LOGGING_LEVEL)
 MANUAL_REACT_PROMPT_TEMPLATE = """
 {base_prompt}
 
-You have access to the following tools:
-
-{tools}
-
+You have access to the following tools: {tools}
 Use the following format:
 
-Question: the input question you must answer
-Thought: you should always think about what to do
-Action: the action to take, should be one of [{tool_names}]
-Action Input: the input to the action
-Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
-Thought: I now know the final answer and am ready to respond to the user.
-Final Answer: the final, conclusive answer to the original input question that will be shown to the user.
+PREVIOUS CONVERSATION:
+{chat_history}
 
-Begin! After the final Observation, you MUST use the 'Thought' and 'Final Answer' format.
+NEW QUESTION: {input}
 
-Question: {input}
+Begin!
+
 Thought:{agent_scratchpad}
 """
 
@@ -47,16 +39,22 @@ class AgentCore:
         with open("./modules/neuranlp_agent/prompts/base_prompt.txt") as f:
             base_prompt_text = f.read()
 
-        self.prompt = PromptTemplate.from_template(MANUAL_REACT_PROMPT_TEMPLATE).partial(
-            base_prompt=base_prompt_text
-        )
+        self.prompt = PromptTemplate(
+            input_variables=["base_prompt", "tools", "chat_history", "input", "agent_scratchpad"],
+            template=MANUAL_REACT_PROMPT_TEMPLATE
+        ).partial(base_prompt=base_prompt_text, tools=str([tool.name for tool in self.tools]))
+
+        self.conversation_memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
         agent = create_react_agent(self.llm, self.tools, self.prompt)
         self.agent_executor = AgentExecutor(
-            agent=agent, 
-            tools=self.tools, 
+            agent=agent,
+            tools=self.tools,
+            memory=self.conversation_memory,
             verbose=True,
-            handle_parsing_errors="I'm sorry, I had trouble understanding my own thoughts. Could you please rephrase?"
+            handle_parsing_errors="I'm sorry, I had trouble understanding my thoughts. Could you please rephrase?",
+            max_iterations=5,
+            prompt_template_kwargs={"base_prompt": base_prompt_text}
         )
 
     def _initialize_llms(self):
@@ -83,15 +81,15 @@ class AgentCore:
     def _setup_tools(self):
         """Sets up the tools available to the agent."""
         tools = [
+            Tool(
+                name="SearchKnowledgeBase",
+                func=self.memory_core.vector.query,
+                description="Use this for answering factual questions. It searches a knowledge base of official campus documents. Good for questions about locations, rules, schedules, etc. Does not search conversation history."
+            ),
             Tool.from_function(
                 func=api_triggers.get_on_campus_users,
                 name="CheckCampusAttendance",
                 description="Use this tool to find out which users (students or staff) are currently present or checked-in on campus. It does not take any input."
-            ),
-            Tool(
-                name="SearchSharedVectorMemory", 
-                func=self.memory_core.vector.query, 
-                description="Use for semantic search of conversations and documents. Ideal for answering 'who', 'what', 'where', 'how' questions based on past knowledge."
             ),
             Tool.from_function(
                 func=api_triggers.call_security,
