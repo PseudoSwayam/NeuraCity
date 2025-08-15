@@ -54,6 +54,15 @@ class ConfigLoader:
         self.YOLO_MODEL_PATH = "modules/cv_watchtower/models/yolov8n.pt"
         self.DETECTION_CONFIDENCE_THRESHOLD = 0.4
         
+        # --- Database Configuration ---
+        self.DATABASE_URL = os.getenv("DATABASE_URL")
+        if not self.DATABASE_URL:
+            print("[ConfigLoader] FATAL: DATABASE_URL is not set in the .env file.")
+        
+        # --- JWT Authentication Configuration ---
+        self.JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+        self.JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+        self.ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
 # --- Singleton Instance ---
 # This ensures the .env file is loaded only once and all modules share the exact same settings object.
 settings = ConfigLoader()

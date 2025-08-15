@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  # The PostgreSQL Database for UserHub and other future services
+  postgres_db:
+    image: postgres:15
+    container_name: neuracity_postgres
+    environment:
+      POSTGRES_USER: neuracity
+      POSTGRES_PASSWORD: your_strong_password
+      POSTGRES_DB: neuracity_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # The Redis instance you are already using
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: neuracity_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

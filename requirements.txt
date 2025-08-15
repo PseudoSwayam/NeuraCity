@@ -22,6 +22,12 @@ aioredis
 websockets
 python-multipart
 google.generativeai
+sqlalchemy
+psycopg2-binary
+alembic
+passlib[bcrypt]
+python-jose[cryptography]
+email-validator
 
 # --- Dependencies for Unit Testing ---
 pytest
