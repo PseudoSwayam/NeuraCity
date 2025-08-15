@@ -69,6 +69,21 @@ def notify_admin(department: str, message: str) -> dict:
         return {"error": str(e)}
 
 
+def get_system_health_summary(dummy_input: str = "") -> str:
+    """
+    Makes an API call to InsightCloud to get a pre-formatted summary
+    of the entire NeuraCity platform's health and recent activity.
+    """
+    api_url = f"{settings.INSIGHTCLOUD_HOST}/stats/system_summary"
+    try:
+        response = requests.get(api_url, timeout=5)
+        response.raise_for_status()
+        # The endpoint returns a JSON with a 'summary' key
+        return response.json().get("summary", "Could not retrieve summary from InsightCloud.")
+    except requests.exceptions.RequestException as e:
+        return f"Failed to get system health data from InsightCloud: {e}"
+
+
 def get_on_campus_users(dummy_input: str = "") -> str:
     """
     Makes an API call to UserHub to get a list of all users

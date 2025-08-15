@@ -50,7 +50,6 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# --- THE ONLY NEW ADDITION IS THIS ENDPOINT ---
 @app.post("/health/ping/{module_name}", summary="Allows a module to report its own health")
 def report_health(module_name: str):
     """
@@ -60,7 +59,6 @@ def report_health(module_name: str):
     health_checker.ping_from_event(module_name)
     return {"status": f"Ping received and health updated for {module_name}"}
 
-# --- Your existing API Endpoints remain unchanged ---
 @app.get("/stats/module_health", summary="Get Health Status of All Modules")
 def get_module_health():
     return health_checker.get_status()
@@ -80,6 +78,27 @@ def find_anomalies():
 @app.get("/stats/realtime_overview", summary="Get Live System Overview")
 def get_realtime_overview():
     return realtime.live_analytics.get_overview()
+
+@app.get("/stats/system_summary", summary="Get a simple text summary of system status")
+def get_system_summary():
+    """
+    Provides a pre-formatted, LLM-friendly text summary of the current
+    system health and recent activity.
+    """
+    health_status = health_checker.get_status()
+    live_overview = realtime.live_analytics.get_overview()
+
+    healthy_modules = [m['module'] for m in health_status if m['status'] == 'Healthy']
+    unhealthy_modules = [m['module'] for m in health_status if m['status'] != 'Healthy' and m['status'] != 'Unknown']
+
+    summary = (
+        f"NeuraCity System Status Summary:\n"
+        f"- Healthy Modules: {', '.join(healthy_modules) or 'None'}\n"
+        f"- Unhealthy/Unresponsive Modules: {', '.join(unhealthy_modules) or 'None'}\n"
+        f"- Live Events Since Startup: {live_overview['live_total_events_since_startup']}\n"
+        f"- Most recent event type: {live_overview.get('most_recent_event', {}).get('event_type', 'N/A')}"
+    )
+    return {"summary": summary}
 
 @app.post("/system/refresh_cache", summary="Manually Refresh Historical Data Cache")
 async def refresh_cache():

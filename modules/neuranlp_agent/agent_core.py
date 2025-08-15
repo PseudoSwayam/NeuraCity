@@ -90,6 +90,11 @@ class AgentCore:
                 description="Use this for answering factual questions. It searches a knowledge base of official campus documents. Good for questions about locations, rules, schedules, etc. Does not search conversation history."
             ),
             Tool.from_function(
+                func=api_triggers.get_system_health_summary,
+                name="GetSystemHealth",
+                description="Use this tool to get a summary of the current operational status and health of all NeuraCity modules. This tool does not require any input."
+            ),
+            Tool.from_function(
                 func=api_triggers.get_on_campus_users,
                 name="CheckCampusAttendance",
                 description="Use this to find out which users are currently checked-in on campus. Takes no input."
