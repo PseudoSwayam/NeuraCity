@@ -5,7 +5,8 @@ import asyncio
 import websockets
 import json
 
-WEBSOCKET_URL = "ws://localhost:8003/ws/alerts"
+ACCESS_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGVydHMtc3lzdGVtQG5ldXJhY2l0eS5kZXYiLCJleHAiOjE3NTUyNzM2MTV9.bwhxEng_PnGx91b72-2FQzjb1Nodt674kgfB4_cjiPk"
+WEBSOCKET_URL = f"ws://localhost:8003/ws/alerts?token={ACCESS_TOKEN}"
 
 async def listen_for_alerts():
     """Connects to the WebSocket and prints any messages it receives."""

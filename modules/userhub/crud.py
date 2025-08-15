@@ -20,3 +20,9 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def get_users_by_role(db: Session, role: models.UserRole) -> list[models.User]:
+    """
+    Retrieves all users from the database who are assigned a specific role.
+    """
+    return db.query(models.User).filter(models.User.role == role).all()

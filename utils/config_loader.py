@@ -28,6 +28,7 @@ class ConfigLoader:
         self.REFLEX_SYSTEM_HOST = os.getenv("REFLEX_SYSTEM_HOST", "http://localhost:8001")
         self.INSIGHTCLOUD_HOST = os.getenv("INSIGHTCLOUD_HOST", "http://localhost:8002")
         self.ALERTS_SERVICE_HOST = os.getenv("ALERTS_SERVICE_HOST", "http://localhost:8003")
+        self.USERHUB_HOST = os.getenv("USERHUB_HOST", "http://localhost:8005")
 
         # Specific API endpoints derived from the host URLs
         self.REFLEX_API_BASE_URL = f"{self.REFLEX_SYSTEM_HOST}/api"
@@ -63,6 +64,8 @@ class ConfigLoader:
         self.JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
         self.JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
         self.ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
+        self.SYSTEM_ADMIN_EMAIL = os.getenv("SYSTEM_ADMIN_EMAIL")
+        self.SYSTEM_ADMIN_PASSWORD = os.getenv("SYSTEM_ADMIN_PASSWORD")
 # --- Singleton Instance ---
 # This ensures the .env file is loaded only once and all modules share the exact same settings object.
 settings = ConfigLoader()

@@ -1,64 +1,58 @@
 # File: modules/alerts_and_notifications/channels/websocket_manager.py
 
 import asyncio
-from typing import Set
+from typing import Set, Dict
 from fastapi import WebSocket
 
 class WebSocketManager:
     """
-    Manages all active WebSocket connections for the Admin Dashboard.
-    This version includes self-healing logic to automatically clean up
-    stale or dead connections during a broadcast.
+    Manages active WebSocket connections, associating each with a specific user ID.
+    This enables broadcasting notifications only to users with the correct role.
     """
     
     def __init__(self):
-        # A set provides fast addition and removal of unique connections
-        self.active_connections: Set[WebSocket] = set()
+        # This dictionary maps a user ID to a SET of their active WebSocket connections.
+        # A user might have the dashboard open on multiple tabs or devices.
+        self.active_connections: Dict[int, Set[WebSocket]] = {}
 
-    async def connect(self, websocket: WebSocket):
-        """Accepts a new client connection and adds it to the active pool."""
+    async def connect(self, websocket: WebSocket, user_id: int):
+        """Accepts a new client connection and maps it to a user ID."""
         await websocket.accept()
-        self.active_connections.add(websocket)
-        print(f"[WebSocket] Client connected: {websocket.client}. Total clients: {len(self.active_connections)}")
+        if user_id not in self.active_connections:
+            self.active_connections[user_id] = set()
+        self.active_connections[user_id].add(websocket)
+        print(f"[WebSocket] Client connected for user_id: {user_id}. Total unique users: {len(self.active_connections)}")
 
-    def disconnect(self, websocket: WebSocket):
-        """
-        Removes a client connection. This is typically called on a clean
-        disconnect signal from the client.
-        """
-        if websocket in self.active_connections:
-            self.active_connections.remove(websocket)
-            print(f"[WebSocket] Client cleanly disconnected. Total clients: {len(self.active_connections)}")
+    def disconnect(self, websocket: WebSocket, user_id: int):
+        """Removes a client connection for a specific user."""
+        if user_id in self.active_connections:
+            user_sockets = self.active_connections[user_id]
+            user_sockets.remove(websocket)
+            # If that was the user's last connection, remove their entry completely.
+            if not user_sockets:
+                del self.active_connections[user_id]
+        print(f"[WebSocket] Client disconnected for user_id: {user_id}. Total unique users: {len(self.active_connections)}")
 
-    async def broadcast(self, payload: dict):
-        """
-        Sends a JSON payload to all connected clients and gracefully handles
-        and removes any stale connections that fail during the send operation.
-        """
-        if not self.active_connections:
+    async def broadcast_to_users(self, user_ids: Set[int], payload: dict):
+        """Sends a JSON payload ONLY to the WebSockets of specified user IDs."""
+        if not self.active_connections or not user_ids:
             return
-        # A temporary set to hold any connections that fail during the broadcast.
-        stale_connections = set()
-        
-        # Phase 1: Attempt to send the message to every connected client.
-        for connection in self.active_connections:
-            try:
-                await connection.send_json(payload)
-            except Exception as e:
-                # If sending a message to a client fails, it means the connection is stale
-                # We mark it for removal.
-                print(f"[WebSocket] Found stale connection. Marking for removal. Error: {type(e).__name__}")
-                stale_connections.add(connection)
-        
-        # Phase 2: Clean up any stale connections that were identified.
-        if stale_connections:
-            print(f"[WebSocket] Removing {len(stale_connections)} stale connection(s)...")
-            for connection in stale_connections:
-                if connection in self.active_connections:
-                    self.active_connections.remove(connection)
-            print(f"[WebSocket] Cleanup complete. Total active clients now: {len(self.active_connections)}")
 
-        if self.active_connections:
-            print(f"[WebSocket] Broadcast successful to {len(self.active_connections)} active client(s).")
+        all_tasks = []
+        target_connections_count = 0
+        
+        # Iterate through the user IDs that need to be notified
+        for user_id in user_ids:
+            # Check if this user has any active connections
+            if user_id in self.active_connections:
+                user_websockets = self.active_connections[user_id]
+                for ws in user_websockets:
+                    all_tasks.append(ws.send_json(payload))
+                    target_connections_count += 1
+        
+        if all_tasks:
+            # Concurrently send the message to all targeted connections.
+            await asyncio.gather(*all_tasks, return_exceptions=True)
+            print(f"[WebSocket] Targeted broadcast successful to {target_connections_count} client(s) for {len(user_ids)} target user(s).")
 
 websocket_manager = WebSocketManager()

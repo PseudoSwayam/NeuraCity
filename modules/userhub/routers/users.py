@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from .. import crud, models, schemas
 from ..database import get_db
-from ..dependencies import get_current_user
+from ..dependencies import get_current_user, require_role 
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -22,3 +22,11 @@ def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 @router.get("/me", response_model=schemas.User)
 async def read_users_me(current_user: schemas.User = Depends(get_current_user)):
     return current_user
+
+@router.get("/by-role/{role}", response_model=List[schemas.User], dependencies=[Depends(require_role(models.UserRole.admin))])
+def read_users_by_role(role: models.UserRole, db: Session = Depends(get_db)):
+    """
+    Get a list of all users assigned to a specific role.
+    This is a protected endpoint intended for inter-service communication.
+    """
+    return crud.get_users_by_role(db, role=role)
