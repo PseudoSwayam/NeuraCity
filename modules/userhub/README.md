@@ -45,7 +45,9 @@ Its core responsibility is to answer three critical questions for the entire pla
 
 The system uses two core tables: one for users and one for their attendance history, linked by a one-to-many relationship.
 
-![Schema](schema.svg)
+<p align="center">
+  <img src="schema.svg" alt="Schema" width="600">
+</p>
 
 ---
 
