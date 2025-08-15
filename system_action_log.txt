@@ -413,3 +413,7 @@
 2025-08-15T21:13:43.028948 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fight Cam (CRITICAL: Aggressive Movement)
 2025-08-15T22:30:59.925775 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Main Library Entrance
 2025-08-15T23:19:25.678668 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: library
+2025-08-15T23:58:13.159272 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'alerts_and_notifications' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-15T23:58:13.489474 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-16T01:02:37.530131 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'alerts_and_notifications' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-16T01:02:37.924995 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.

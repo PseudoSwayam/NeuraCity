@@ -1,9 +1,11 @@
 # File: modules/neuranlp_agent/utils/api_triggers.py
 
 import requests
+from fastapi import Header
 from . import config
 import logging
 from utils.config_loader import settings
+from typing import Optional
 
 logging.basicConfig(level=config.LOGGING_LEVEL)
 
@@ -69,16 +71,20 @@ def notify_admin(department: str, message: str) -> dict:
         return {"error": str(e)}
 
 
-def get_system_health_summary(dummy_input: str = "") -> str:
+def get_system_health_summary(dummy_input: str = "", token: Optional[str] = None) -> str:
     """
     Makes an API call to InsightCloud to get a pre-formatted summary
     of the entire NeuraCity platform's health and recent activity.
     """
     api_url = f"{settings.INSIGHTCLOUD_HOST}/stats/system_summary"
+    headers = {}
+    if token:
+        headers["Authorization"] = token
     try:
-        response = requests.get(api_url, timeout=5)
+        response = requests.get(api_url, timeout=5, headers=headers)
+        if response.status_code == 401:
+            return "Authorization Error: You do not have the required permissions to view system health."
         response.raise_for_status()
-        # The endpoint returns a JSON with a 'summary' key
         return response.json().get("summary", "Could not retrieve summary from InsightCloud.")
     except requests.exceptions.RequestException as e:
         return f"Failed to get system health data from InsightCloud: {e}"

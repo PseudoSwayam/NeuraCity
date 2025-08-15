@@ -1,10 +1,18 @@
 # File: modules/insightcloud/app.py
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
 import asyncio
 from . import analytics, realtime
 from .healthcheck import health_checker
+import sys, os
+
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from modules.userhub.dependencies import get_current_user, require_role
+from modules.userhub.models import UserRole
 
 # Global handles for background tasks for graceful shutdown
 redis_listener_task = None
@@ -63,15 +71,15 @@ def report_health(module_name: str):
 def get_module_health():
     return health_checker.get_status()
 
-@app.get("/stats/events_per_day", summary="Get Historical Event Counts Per Day")
+@app.get("/stats/events_per_day", summary="Get Historical Event Counts Per Day", dependencies=[Depends(require_role(UserRole.admin))])
 def get_events_per_day():
     return analytics.get_events_per_day()
 
-@app.get("/stats/events_by_module", summary="Get Historical Event Counts by Source Module")
+@app.get("/stats/events_by_module", summary="Get Historical Event Counts by Source Module", dependencies=[Depends(require_role(UserRole.admin))])
 def get_events_by_module():
     return analytics.get_events_by_module()
 
-@app.get("/stats/anomalies", summary="Detect Anomalous Event Spikes")
+@app.get("/stats/anomalies", summary="Detect Anomalous Event Spikes", dependencies=[Depends(require_role(UserRole.admin))])
 def find_anomalies():
     return analytics.find_anomalies()
 
@@ -79,7 +87,7 @@ def find_anomalies():
 def get_realtime_overview():
     return realtime.live_analytics.get_overview()
 
-@app.get("/stats/system_summary", summary="Get a simple text summary of system status")
+@app.get("/stats/system_summary", summary="Get a simple text summary of system status", dependencies=[Depends(require_role(UserRole.admin))])
 def get_system_summary():
     """
     Provides a pre-formatted, LLM-friendly text summary of the current
@@ -100,7 +108,7 @@ def get_system_summary():
     )
     return {"summary": summary}
 
-@app.post("/system/refresh_cache", summary="Manually Refresh Historical Data Cache")
+@app.post("/system/refresh_cache", summary="Manually Refresh Historical Data Cache", dependencies=[Depends(require_role(UserRole.admin))])
 async def refresh_cache():
     success = await analytics.refresh_data_cache()
     return {"status": "success" if success else "failed", "message": "Data cache refresh completed."}

@@ -1,8 +1,7 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Header, Depends, Request
 from pydantic import BaseModel
 from typing import Optional
 from .agent_core import agent_core
-# MODIFIED: Import the GETTER function, not the object itself
 from .voice_handler import get_voice_handler 
 from .utils import config
 import logging
@@ -22,16 +21,15 @@ class QueryResponse(BaseModel):
     audio_output: Optional[str] = None
 
 @app.post("/query", response_model=QueryResponse)
-async def handle_query(query: str = Form(...), mode: str = Form("text"), file: Optional[UploadFile] = File(None)):
+async def handle_query(request: Request, query: str = Form(...), mode: str = Form("text"), file: Optional[UploadFile] = File(None)):
     """Handles student and staff queries.
     - query: The user's question or command.
     - mode: 'text' for text-based interaction, 'voice' for voice-based interaction.
     - file: The audio file (e.g., WAV, MP3) if mode is 'voice'.
     """
-    # MODIFIED: Get the handler instance at the start of the request
-    voice_handler = get_voice_handler() 
+    auth_token = request.headers.get("Authorization")
 
-    # --- THE REST OF YOUR LOGIC IS IDENTICAL ---
+    voice_handler = get_voice_handler() 
     user_query = query
 
     if mode == "voice":
@@ -53,8 +51,8 @@ async def handle_query(query: str = Form(...), mode: str = Form("text"), file: O
 
     if not user_query:
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
-
-    result = agent_core.run_query(user_query)
+    
+    result = agent_core.run_query(user_query, auth_token=auth_token)
 
     audio_output = None
     if mode == "voice" and result and "error" not in result.get("response", "").lower():
