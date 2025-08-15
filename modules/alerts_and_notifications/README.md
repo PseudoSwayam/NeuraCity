@@ -109,7 +109,9 @@ socket.onclose = () => {
 ## Integrating the Mobile App (via Webhooks)
 
 For mobile push notifications, configure this module’s webhook channel to point to your own dedicated push notification “bridge” service.
+
 	1.	Open modules/alerts_and_notifications/utils/config.py.
+ 
 	2.	Set the WEBHOOK_URL to the endpoint of your push notification service (e.g., an AWS Lambda function that triggers Firebase/APNs).
 
 ---
