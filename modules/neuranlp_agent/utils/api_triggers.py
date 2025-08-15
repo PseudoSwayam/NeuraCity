@@ -5,7 +5,6 @@ from . import config
 import logging
 from utils.config_loader import settings
 
-# This line correctly sets up the logger based on your module's specific config
 logging.basicConfig(level=config.LOGGING_LEVEL)
 
 
@@ -70,7 +69,7 @@ def notify_admin(department: str, message: str) -> dict:
         return {"error": str(e)}
 
 
-def get_on_campus_users() -> str:
+def get_on_campus_users(dummy_input: str = "") -> str:
     """
     Makes an API call to UserHub to get a list of all users
     who are currently checked in.

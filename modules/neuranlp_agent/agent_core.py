@@ -10,24 +10,30 @@ from .utils import api_triggers
 from memorycore.memory_manager import get_memory_core
 import logging
 from langchain.memory import ConversationBufferMemory
+from langchain_core.prompts import ChatPromptTemplate
 
 logging.basicConfig(level=config.LOGGING_LEVEL)
 
-MANUAL_REACT_PROMPT_TEMPLATE = """
-{base_prompt}
+REACT_PROMPT = """
+Answer the following questions as best you can. You have access to the following tools:
 
-You have access to the following tools: {tools}
+{tools}
+
 Use the following format:
 
-PREVIOUS CONVERSATION:
-{chat_history}
-
-NEW QUESTION: {input}
+Question: the input question you must answer
+Thought: you should always think about what to do
+Action: the action to take, should be one of [{tool_names}]
+Action Input: the input to the action
+Observation: the result of the action
+... (this Thought/Action/Action Input/Observation can repeat N times)
+Thought: I now know the final answer
+Final Answer: the final answer to the original input question
 
 Begin!
 
-Thought:{agent_scratchpad}
-"""
+Question: {input}
+Thought:{agent_scratchpad}"""
 
 class AgentCore:
     def __init__(self):
@@ -39,11 +45,8 @@ class AgentCore:
         with open("./modules/neuranlp_agent/prompts/base_prompt.txt") as f:
             base_prompt_text = f.read()
 
-        self.prompt = PromptTemplate(
-            input_variables=["base_prompt", "tools", "chat_history", "input", "agent_scratchpad"],
-            template=MANUAL_REACT_PROMPT_TEMPLATE
-        ).partial(base_prompt=base_prompt_text, tools=str([tool.name for tool in self.tools]))
-
+        full_prompt_string = f"{base_prompt_text}\n\n{REACT_PROMPT}"
+        self.prompt = PromptTemplate.from_template(full_prompt_string)
         self.conversation_memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
         agent = create_react_agent(self.llm, self.tools, self.prompt)
@@ -89,7 +92,7 @@ class AgentCore:
             Tool.from_function(
                 func=api_triggers.get_on_campus_users,
                 name="CheckCampusAttendance",
-                description="Use this tool to find out which users (students or staff) are currently present or checked-in on campus. It does not take any input."
+                description="Use this to find out which users are currently checked-in on campus. Takes no input."
             ),
             Tool.from_function(
                 func=api_triggers.call_security,
