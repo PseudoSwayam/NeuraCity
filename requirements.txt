@@ -20,6 +20,8 @@ pandas
 scikit-learn
 aioredis
 websockets
+python-multipart
+google.generativeai
 
 # --- Dependencies for Unit Testing ---
 pytest
