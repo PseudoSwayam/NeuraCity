@@ -8,8 +8,8 @@ USERHUB_URL = "http://localhost:8005"
 NEURANLP_AGENT_URL = "http://localhost:8000"
 
 # --- Use the credentials for the ADMIN/SUPERADMIN user you created ---
-ADMIN_EMAIL = "swayam@neuracity.dev"
-ADMIN_PASSWORD = "stutiswayam"
+ADMIN_EMAIL = "admin_email"
+ADMIN_PASSWORD = "admin_password"
 
 def run_test():
     """Performs the full, authenticated end-to-end test."""
