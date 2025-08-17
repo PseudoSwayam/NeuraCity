@@ -80,19 +80,9 @@ The mobile app itself **does not** maintain a persistent WebSocket connection. I
 
 **The End-to-End Data Flow for a Mobile Alert:**
 
-```mermaid
-graph TD
-    A["<b>cv_watchtower</b><br>Detects a fire in Lab-01"] --> B["<b>reflex_system</b>"];
-    B -- "Publishes Event to Redis" --> C["<b>alerts_and_notifications</b>"];
-    C -- "Sends Webhook POST" --> D["<b>Push Notification Service</b><br>(A separate, tiny serverless function<br>you will build, e.g., on AWS Lambda)"];
-    D -- "Queries <b>UserHub</b> to find all<br>users whose office is in 'Lab-01'" --> U["<b>UserHub</b>"];
-    D -- "Tells Firebase/Apple to send a<br>push to the specific devices<br>of the targeted users" --> P["<b>Firebase Cloud Messaging /<br>Apple Push Notification Service</b>"];
-    P -- "Delivers a Push Notification" --> M["<b>User's Mobile Device</b><br>(Even if the app is closed)"];
-    
-    style M fill:#e2f0d9,stroke:#70ad47,stroke-width:2px;
-    style C fill:#4d3300,stroke:#ff8c00,stroke-width:2px,color:#fff
-    style D fill:#5a2d6b,stroke:#a457c1,stroke-width:2px,color:#fff
-```
+<p align="center">
+  <img src="diagram.svg" alt="Schema" width="600">
+</p>
 
 ---
 
