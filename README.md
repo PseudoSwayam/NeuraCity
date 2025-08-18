@@ -14,7 +14,7 @@ NeuraCity is built on a robust, decoupled microservices architecture. Each modul
 
 ![NeuraCity Architecture](docs/Architecture.png)
 
-### BackEnd Architecture
+## BackEnd Architecture :
 
 ![Backend Architecture](docs/Backend_Architecture.svg)
 
