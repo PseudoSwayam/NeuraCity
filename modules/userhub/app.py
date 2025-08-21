@@ -1,5 +1,6 @@
 # File: modules/userhub/app.py
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from .database import Base, engine
 from .routers import auth, users, attendance
 
@@ -10,6 +11,18 @@ app = FastAPI(
     title="NeuraCity UserHub",
     description="The central identity, authentication, and user data service for the NeuraCity platform.",
     version="1.0.0"
+)
+
+origins = [
+    "*"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allows all headers
 )
 
 # Include the routers
