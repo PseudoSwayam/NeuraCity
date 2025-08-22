@@ -55,7 +55,9 @@ The reflex_system is designed to be a continuous, standalone service and a core 
 
 1.  **Prerequisites**: Ensure that **Redis** is running (e.g., via Docker) subscribe to its notifications.
     ```bash
-    docker run -d --name neura-redis -p 6379:6379 redis/redis-stack-server:latest
+    docker run -d --name neura-redis -p 6379:6379 redis/redis-stack-server:latest #Only Once at the start
+
+    docker start redis-stack-server
     docker exec -it redis-stack-server redis-cli
       > SUBSCRIBE campus_notifications
     ```
