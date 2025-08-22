@@ -62,7 +62,9 @@ The project's virtual environment (venv) must be active.
 ### 2. **Start the Database**
 Run the PostgreSQL container. You only need to do this once.
 ```bash
-docker run --name neuracity-postgres -e POSTGRES_PASSWORD=your_super_secret_password -e POSTGRES_USER=neuracity -e POSTGRES_DB=neuracity_db -p 5432:5432 -d postgres
+docker run --name neuracity-postgres -e POSTGRES_PASSWORD=your_super_secret_password -e POSTGRES_USER=neuracity -e POSTGRES_DB=neuracity_db -p 5432:5432 -d postgres #Only Once
+
+docker start neuracity-postgres
 ```
 
 ### 3. **Configure Environment Variables**
