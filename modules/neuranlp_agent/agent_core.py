@@ -3,10 +3,17 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_community.llms import Ollama
 from langchain.prompts import PromptTemplate
-from langchain.agents import Tool, AgentExecutor, create_react_agent
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain.agents import Tool, AgentExecutor, create_openai_functions_agent
+from langchain.agents.format_scratchpad.openai_tools import (
+    format_to_openai_tool_messages,
+)
+from langchain.agents.output_parsers.openai_tools import OpenAIToolsAgentOutputParser
+from langchain_core.runnables import RunnablePassthrough
+from langchain_core.messages import AIMessage, HumanMessage
 from google.generativeai.types import HarmCategory, HarmBlockThreshold
 from langchain.memory import ConversationBufferMemory
-from typing import Optional
+from typing import Optional, Any
 import logging
 
 from .utils import config
@@ -16,36 +23,6 @@ from memorycore.memory_manager import get_memory_core
 
 
 logging.basicConfig(level=logging.INFO)
-
-MANUAL_REACT_PROMPT_TEMPLATE = """
-{base_prompt}
-
-You have access to the following tools:
-{tools}
-
-Use the following format:
-
-Question: the input question you must answer
-Thought: you should always think about what to do
-Action: the action to take, should be one of [{tool_names}]
-Action Input: the input to the action
-Observation: the result of the action
-... (this Thought/Action/Action Input/Observation can repeat N times)
-Thought: I now know the final answer and am ready to respond to the user.
-
---- IMPORTANT ---
-If an Action result is an error or indicates failure, your Final Answer MUST inform the user about the failure and suggest a next step. Do not retry the same action.
-
-Final Answer: the final, conclusive answer to the original input question that will be shown to the user.
-
-Begin!
-
-PREVIOUS CONVERSATION:
-{chat_history}
-
-NEW QUESTION: {input}
-Thought:{agent_scratchpad}
-"""
 
 class AgentCore:
     def __init__(self):
@@ -57,22 +34,39 @@ class AgentCore:
         with open("./modules/neuranlp_agent/prompts/base_prompt.txt") as f:
             base_prompt_text = f.read()
 
-        self.prompt = PromptTemplate.from_template(MANUAL_REACT_PROMPT_TEMPLATE).partial(base_prompt=base_prompt_text)
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", base_prompt_text),
+                MessagesPlaceholder(variable_name="chat_history"),
+                ("user", "{input}"),
+                MessagesPlaceholder(variable_name="agent_scratchpad"),
+            ]
+        )
+        
+        llm_with_tools = self.llm.bind_tools(self.tools)
         
         # Each user session will have its own conversational memory.
-        self.conversation_memory = ConversationBufferMemory(
+        self.agent = (
+            RunnablePassthrough.assign(
+                agent_scratchpad=lambda x: format_to_openai_tool_messages(
+                    x["intermediate_steps"]
+                )
+            )
+            | prompt
+            | llm_with_tools
+            | OpenAIToolsAgentOutputParser()
+        )
+        
+        self.memory = ConversationBufferMemory(
             memory_key="chat_history", return_messages=True
         )
-
-        agent = create_react_agent(self.llm, self.tools, self.prompt)
         
         self.agent_executor = AgentExecutor(
-            agent=agent,
+            agent=self.agent,
             tools=self.tools,
-            memory=self.conversation_memory,
             verbose=True,
-            handle_parsing_errors="I'm sorry, I'm having trouble thinking clearly. Could you please rephrase your request?",
-            max_iterations=5,
+            memory=self.memory,
+            handle_parsing_errors=True
         )
 
     def _initialize_llms(self):
@@ -92,6 +86,14 @@ class AgentCore:
             llm = Ollama(base_url=settings.OLLAMA_BASE_URL, model=settings.OLLAMA_MODEL)
             return llm, "ollama"
 
+    def _parse_tool_input(self, tool_input: Any) -> str:
+        """A robust helper to extract a simple string from a tool's input."""
+        # The agent sometimes passes a dict like {'location': 'library'}, This function intelligently extracts the value.
+        if isinstance(tool_input, dict):
+            # Take the value of the first key
+            return next(iter(tool_input.values()), "")
+        return str(tool_input) # Otherwise, just convert to string
+
     def _setup_tools(self):
         """Sets up tools that are now aware of the agent's current security context."""
         tools = [
@@ -107,8 +109,16 @@ class AgentCore:
             ),
             # Unsecured tools
             Tool(name="SearchKnowledgeBase", func=self.memory_core.vector.query, description="Use for factual questions from campus documents."),
-            Tool.from_function(func=api_triggers.call_security, name="CallSecurity", description="Use for emergencies to dispatch security."),
-            Tool.from_function(func=api_triggers.send_announcement, name="SendCampusAnnouncement", description="Use to send a campus-wide announcement."),
+            Tool(
+                name="CallSecurity",
+                func=lambda location_input: api_triggers.call_security(self._parse_tool_input(location_input)),
+                description="Use for emergencies to dispatch security to a location. The input is only the location as a string."
+            ),
+            Tool(
+                name="SendCampusAnnouncement",
+                func=lambda message_input: api_triggers.send_announcement(self._parse_tool_input(message_input)),
+                description="Use to send a campus-wide announcement. The input is the full message string."
+            ),
             Tool.from_function(
                 func=lambda input_str: api_triggers.notify_admin(
                     department=input_str.split(',')[0].strip(),
@@ -126,7 +136,7 @@ class AgentCore:
         """
         self.current_auth_token = auth_token
         try:
-            response = self.agent_executor.invoke({"input": query})
+            response = self.agent_executor.invoke({"input": query}) 
             convo_text = f"User query: {query}\nAI response: {response['output']}"
             self.memory_core.vector.add(
                 source='neuranlp_agent', type='conversation_log',

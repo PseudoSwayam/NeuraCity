@@ -749,3 +749,27 @@
 2025-08-24T13:20:50.054533 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Normal Activity Cam (CRITICAL: Aggressive Movement)
 2025-08-24T13:23:58.224193 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
 2025-08-24T13:26:19.860350 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: {"location": "library"}
+2025-08-24T13:33:58.752759 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T13:43:59.036285 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'neuranlp_agent' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T13:43:59.166036 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T13:53:59.277757 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'neuranlp_agent' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T13:53:59.306466 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T14:03:59.415634 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'neuranlp_agent' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T14:03:59.429778 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T14:04:53.099483 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: the library
+2025-08-24T14:13:59.592555 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T14:23:59.712907 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T14:33:59.883302 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T14:40:15.470187 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'neuranlp_agent' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T14:45:15.528138 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T14:52:02.357337 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'neuranlp_agent' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T14:59:49.024114 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T15:09:49.197283 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T15:19:49.284340 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T15:29:49.445299 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T15:39:49.512529 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T15:41:23.484450 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: main gate
+2025-08-24T15:44:02.868791 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: the main gate
+2025-08-24T15:45:35.957090 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Aggressive Movement)
+2025-08-24T15:45:44.903643 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Normal Activity Cam (CRITICAL: Aggressive Movement)
+2025-08-24T15:53:48.369733 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
