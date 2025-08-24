@@ -14,15 +14,13 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from modules.userhub.database import get_db
+from modules.userhub.database import SessionLocal
 from modules.userhub.dependencies import get_current_user
 from modules.userhub.schemas import User as UserSchema
 from utils.config_loader import settings
 from .event_processor import EventProcessor
 from .channels.websocket_manager import websocket_manager
 
-
-# --- Your perfect lifespan manager is unchanged ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
@@ -64,18 +62,19 @@ app.add_middleware(
 async def websocket_endpoint(
     websocket: WebSocket,
     token: str, # The frontend must provide the user's JWT token
-    db: Session = Depends(get_db)
 ):
     """
     Accepts WebSocket connections from AUTHENTICATED users and maps the
     connection to their user ID.
     """
+    db: Session = SessionLocal()
+    user: UserSchema = None
     try:
         # Authenticate the user based on the provided token
-        user: UserSchema = await get_current_user(token=token, db=db)
-        if not user:
+        user = await get_current_user(token=token, db=db)
+        if not user or not user.is_active:
             # If the token is invalid, close the connection
-            await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Invalid credentials or inactive user")
             return
         
         # If authenticated, connect them and map the socket to their ID
@@ -85,8 +84,18 @@ async def websocket_endpoint(
             await websocket.receive_text() # Keep connection alive
             
     except WebSocketDisconnect:
-        if user: # If user was authenticated before disconnecting
+        print(f"[WebSocket] Client disconnected cleanly.")
+    except Exception as e:
+        # Catch any other unexpected errors.
+        print(f"An error occurred in the WebSocket connection: {e}")
+        await websocket.close(code=status.WS_1011_INTERNAL_ERROR)
+    finally:
+        # A clean disconnect and session close.
+        if user: # If the user was successfully authenticated before disconnection
             websocket_manager.disconnect(websocket, user.id)
+        # Close the manually created database session to free up resources.
+        db.close()
+        print("[WebSocket] Connection resources cleaned up.")
 
 @app.get("/", summary="Health Check")
 def health_check():
