@@ -744,3 +744,8 @@
 2025-08-24T12:58:57.975877 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'alerts_and_notifications' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
 2025-08-24T13:03:58.040878 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
 2025-08-24T13:08:58.087519 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'alerts_and_notifications' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T13:13:58.139725 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T13:20:44.223997 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Aggressive Movement)
+2025-08-24T13:20:50.054533 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Normal Activity Cam (CRITICAL: Aggressive Movement)
+2025-08-24T13:23:58.224193 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-24T13:26:19.860350 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: {"location": "library"}
