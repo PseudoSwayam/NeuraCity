@@ -104,6 +104,21 @@ let alertIdCounter = 0;
 let socket = null;
 
 // --- WEBSOCKET & MAP LOGIC ---
+const getWebSocketUrlWithToken = () => {
+  // 1. Try to read the JWT token from the browser's localStorage.
+  //    This token MUST be saved here by your main Admin Dashboard's login page.
+  //    The key 'access_token' must match what the dashboard uses to save it.
+  const storedToken = localStorage.getItem('access_token');
+  
+  if (!storedToken) {
+    console.error("CRITICAL AUTH ERROR: No 'access_token' found in localStorage. Cannot connect to live feed. Please log in through the main dashboard.");
+    return null; // Return null to signal a failure
+  }
+  
+  // 2. If the token is found, construct the full, authenticated WebSocket URL.
+  return `ws://localhost:8003/ws/alerts?token=${storedToken}`;
+};
+
 const handleIncomingAlert = (alertData) => {
   const message = alertData.human_readable_message;
   latestAlert.value = message;
@@ -160,7 +175,7 @@ const connectWebSocket = () => {
   socket.onopen = () => {
     isConnected.value = true;
     isError.value = false;
-    connectionStatus.value = 'Live';
+    connectionStatus.value = 'Connected';
   };
   socket.onmessage = (event) => {
     handleIncomingAlert(JSON.parse(event.data));

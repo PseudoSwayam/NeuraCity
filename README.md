@@ -83,6 +83,12 @@ alembic upgrade head
 
 3. Launch All Services
 ```bash
+# Run all of the Docker Servers
+docker start neuracity-postgres #PostgreSQL Server
+docker start redis-stack-server #Redis Server for Alerts & Notifications
+```
+
+```bash
 # Make it executable (only needs to be done once)
 chmod +x backend/run_all_services.sh
 
