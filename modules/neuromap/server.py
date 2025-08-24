@@ -1,42 +1,74 @@
 # File: modules/neuromap/server.py
-# Hosts the NeuraCity NeuroMap frontend application.
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from contextlib import asynccontextmanager
+import httpx
+import sys
 import os
+
+# Ensure the project root is in the path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+from utils.config_loader import settings
+
+# This dictionary acts as a simple in-memory cache for the service token.
+token_cache = {"access_token": None}
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """On startup, this will automatically log in to UserHub to get a service token."""
+    print("[NeuroMap Server] Starting up and authenticating as a system service...")
+    auth_url = f"{settings.USERHUB_HOST}/auth/token"
+    credentials = {
+        "username": settings.SYSTEM_ADMIN_EMAIL,
+        "password": settings.SYSTEM_ADMIN_PASSWORD
+    }
+    
+    if not all(credentials.values()):
+        print("❌ FATAL: System admin credentials not found in .env file.")
+    else:
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(auth_url, data=credentials, timeout=10)
+                response.raise_for_status()
+                token_cache["access_token"] = response.json()["access_token"]
+                print("✅ [NeuroMap Server] Successfully authenticated with UserHub.")
+        except httpx.RequestError as e:
+            print(f"❌ FATAL: Could not authenticate NeuroMap with UserHub on startup. {e}")
+    
+    yield
+    print("[NeuroMap Server] Shutting down.")
+
 
 app = FastAPI(
     title="NeuraCity NeuroMap Host",
-    description="Serves the interactive map interface for the NeuraCity platform.",
+    description="Serves the interactive map interface and provides secure WebSocket tokens.",
+    lifespan=lifespan
+)
+app.add_middleware(
+    CORSMiddleware, allow_origins=["*"], allow_credentials=True,
+    allow_methods=["*"], allow_headers=["*"],
 )
 
-# --- Mount the Static Frontend Files ---
-# This tells FastAPI to serve the built Vue.js application.
-# The 'dist' directory will be created when you run 'npm run build' in the frontend.
-static_files_path = os.path.join(os.path.dirname(__file__), "frontend", "dist")
 
-if not os.path.exists(static_files_path):
-    print("\n" + "="*50)
-    print("FATAL ERROR: The 'frontend/dist' directory was not found.")
-    print("Please build the Vue.js application first by running the following commands:")
-    print("1. cd modules/neuromap/frontend")
-    print("2. npm install")
-    print("3. npm run build")
-    print("="*50 + "\n")
-else:
-    app.mount("/assets", StaticFiles(directory=os.path.join(static_files_path, "assets")), name="assets")
+@app.get("/api/get-websocket-token", response_class=JSONResponse)
+async def get_websocket_token():
+    """A secure endpoint for the frontend to fetch the service token."""
+    if token_cache["access_token"]:
+        return {"token": token_cache["access_token"]}
+    else:
+        return JSONResponse(status_code=503, content={"error": "Service Unavailable: Auth token not ready."})
 
-    @app.get("/")
-    async def read_root():
-        """Serves the main index.html of the frontend application."""
-        return FileResponse(os.path.join(static_files_path, 'index.html'))
+# --- Static file serving logic ---
+frontend_path = os.path.join(os.path.dirname(__file__), "frontend", "dist")
 
-    # This catch-all is important for single-page applications (SPAs) like Vue
-    @app.get("/{catchall:path}")
-    def serve_spa(catchall: str):
-        """Redirects all other paths to the index.html for the SPA to handle routing."""
-        return FileResponse(os.path.join(static_files_path, 'index.html'))
-
-# To run this server:
-# python3 -m uvicorn modules.neuromap.server:app --host 0.0.0.0 --port 8004 --reload
+@app.get("/{catchall:path}")
+async def serve_spa(request: Request, catchall: str):
+    static_file_path = os.path.join(frontend_path, catchall)
+    if os.path.isfile(static_file_path):
+        return FileResponse(static_file_path)
+    return FileResponse(os.path.join(frontend_path, 'index.html'))

@@ -46,6 +46,7 @@
 import { ref, reactive, onMounted, onUnmounted } from 'vue';
 import "leaflet/dist/leaflet.css";
 import { LMap, LTileLayer, LMarker, LIcon, LPopup } from "@vue-leaflet/vue-leaflet";
+import { latLng } from "leaflet";
 
 // --- CORE CONFIGURATION ---
 const ALERTS_WEBSOCKET_URL = "ws://localhost:8003/ws/alerts";
@@ -91,7 +92,7 @@ const center = ref([40.7140, -74.0060]);
 const map = ref(null); // Reference to the map object for API calls like flyTo
 
 // Connection Status
-const connectionStatus = ref('Connecting...');
+const connectionStatus = ref('Authenticating...');
 const isConnected = ref(false);
 const isError = ref(false);
 
@@ -104,21 +105,60 @@ let alertIdCounter = 0;
 let socket = null;
 
 // --- WEBSOCKET & MAP LOGIC ---
-const getWebSocketUrlWithToken = () => {
-  // 1. Try to read the JWT token from the browser's localStorage.
-  //    This token MUST be saved here by your main Admin Dashboard's login page.
-  //    The key 'access_token' must match what the dashboard uses to save it.
-  const storedToken = localStorage.getItem('access_token');
+async function fetchWebSocketToken() {
+    try {
+        // Fetch the service token from our own backend server running on port 8004.
+        // This is a relative URL because the frontend is served from the same host.
+        const response = await fetch('/api/get-websocket-token');
+        if (!response.ok) {
+            throw new Error(`Failed to fetch auth token from NeuroMap server. Status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (!data.token) {
+             throw new Error("Token was empty in server response.");
+        }
+        return data.token;
+    } catch (error) {
+        console.error("Error fetching WebSocket token:", error);
+        connectionStatus.value = "Auth Failed";
+        isError.value = true;
+        return null;
+    }
+}
+
+const connectWebSocket = (token) => {
+  if (socket) { socket.close(); } // Ensure old connections are closed
+  const wsUrl = `${ALERTS_WEBSOCKET_URL_BASE}?token=${token}`;
+  socket = new WebSocket(wsUrl);
   
-  if (!storedToken) {
-    console.error("CRITICAL AUTH ERROR: No 'access_token' found in localStorage. Cannot connect to live feed. Please log in through the main dashboard.");
-    return null; // Return null to signal a failure
-  }
+  socket.onopen = () => {
+    isConnected.value = true;
+    isError.value = false;
+    connectionStatus.value = 'Connected';
+    console.log("✅ WebSocket connection successful!");
+  };
   
-  // 2. If the token is found, construct the full, authenticated WebSocket URL.
-  return `ws://localhost:8003/ws/alerts?token=${storedToken}`;
+  socket.onmessage = (event) => handleIncomingAlert(JSON.parse(event.data));
+  
+  socket.onclose = () => {
+    isConnected.value = false;
+    if (!isError.value) { // Don't try to reconnect if there was a fatal error
+      connectionStatus.value = 'Reconnecting...';
+      setTimeout(initializeConnection, 5000);
+    }
+  };
+
+  socket.onerror = (err) => {
+    isConnected.value = false;
+    isError.value = true;
+    connectionStatus.value = 'Connection Error';
+    console.error("WebSocket Error:", err);
+    socket.close();
+  };
 };
 
+
+// This is the function that orchestrates the entire connection process.
 const handleIncomingAlert = (alertData) => {
   const message = alertData.human_readable_message;
   latestAlert.value = message;
@@ -169,33 +209,18 @@ const handleIncomingAlert = (alertData) => {
   setTimeout(() => { showLatestAlert.value = false }, 7000); // Hide banner after 7 seconds
 };
 
-const connectWebSocket = () => {
-  socket = new WebSocket(ALERTS_WEBSOCKET_URL);
-
-  socket.onopen = () => {
-    isConnected.value = true;
-    isError.value = false;
-    connectionStatus.value = 'Connected';
-  };
-  socket.onmessage = (event) => {
-    handleIncomingAlert(JSON.parse(event.data));
-  };
-  socket.onclose = () => {
-    isConnected.value = false;
-    connectionStatus.value = 'Reconnecting...';
-    setTimeout(connectWebSocket, 5000);
-  };
-  socket.onerror = () => {
-    isConnected.value = false;
-    isError.value = true;
-    connectionStatus.value = 'Connection Failed';
-    socket.close();
-  };
-};
+async function initializeConnection() {
+    connectionStatus.value = "Authenticating service...";
+    const token = await fetchWebSocketToken();
+    if (token) {
+        connectionStatus.value = "Connecting to live feed...";
+        connectWebSocket(token);
+    }
+}
 
 // --- VUE LIFECYCLE HOOKS ---
 onMounted(() => {
-  connectWebSocket();
+  initializeConnection();
 });
 onUnmounted(() => {
   if (socket) socket.close();

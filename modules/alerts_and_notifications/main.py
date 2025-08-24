@@ -5,7 +5,7 @@ import os
 import asyncio
 import json
 import aioredis
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, status
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, status, Query
 from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,12 +14,15 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from modules.userhub.database import SessionLocal
-from modules.userhub.crud import get_user_from_token
-from modules.userhub.schemas import User as UserSchema
-from utils.config_loader import settings
+# Import local components AFTER the path is fixed.
 from .event_processor import EventProcessor
 from .channels.websocket_manager import websocket_manager
+
+# Import external dependencies AFTER local ones.
+from utils.config_loader import settings
+from modules.userhub.database import SessionLocal
+from modules.userhub.crud import get_user_from_token
+from modules.userhub.models import User as UserModel
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -57,43 +60,50 @@ app.add_middleware(
     allow_headers=["*"],  # Allows all headers
 )
 
-# --- Your perfect WebSocket endpoint is unchanged ---
 @app.websocket("/ws/alerts")
-async def websocket_endpoint(
-    websocket: WebSocket,
-    token: str, # The frontend must provide the user's JWT token
-):
+async def websocket_endpoint(websocket: WebSocket):
     """
-    Accepts WebSocket connections from AUTHENTICATED users and maps the
-    connection to their user ID.
+    Accepts WebSocket connections, authenticates the user using the token from
+    the query parameters, and maintains the connection.
     """
+    # 1. Manually extract the token from the WebSocket's query parameters.
+    token = websocket.query_params.get('token')
+
+    if not token:
+        # If no token is provided at all, reject the connection.
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Missing authentication token")
+        return
+
+    # 2. Manually create a new, dedicated database session for this connection.
     db: Session = SessionLocal()
-    user: UserSchema = None
+    user: UserModel = None
     try:
-        # Authenticate the user based on the provided token
+        # 3. Use the clean CRUD function to authenticate the user.
         user = get_user_from_token(db=db, token=token)
+        
         if not user or not user.is_active:
-            # If the token is invalid, close the connection
+            # If the token is invalid or the user is inactive, reject.
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Invalid credentials or inactive user")
             return
         
-        # If authenticated, connect them and map the socket to their ID
+        # 4. If authentication succeeds, connect them to the manager.
         await websocket_manager.connect(websocket, user.id)
         
+        # 5. Keep the connection alive.
         while True:
-            await asyncio.sleep(1) # Keep connection alive
-            
+            # This is a robust way to keep the connection open and detect disconnects.
+            await websocket.receive_text()
+
     except WebSocketDisconnect:
-        print(f"[WebSocket] Client disconnected cleanly.")
+        print(f"[WebSocket] Client for user {getattr(user, 'id', 'unknown')} disconnected.")
     except Exception as e:
-        # Catch any other unexpected errors.
-        print(f"An error occurred in the WebSocket connection: {e}")
+        print(f"An unexpected error occurred in WebSocket: {e}")
+        # Best effort to close the connection with an error code.
         await websocket.close(code=status.WS_1011_INTERNAL_ERROR)
     finally:
-        # A clean disconnect and session close.
-        if user: # If the user was successfully authenticated before disconnection
+        # 6. Always clean up resources.
+        if user:
             websocket_manager.disconnect(websocket, user.id)
-        # Close the manually created database session to free up resources.
         db.close()
         print("[WebSocket] Connection resources cleaned up.")
 

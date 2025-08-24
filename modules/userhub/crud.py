@@ -20,11 +20,10 @@ def get_user_from_token(db: Session, token: str) -> Optional[models.User]:
         email: str = payload.get("sub")
         if email is None:
             return None
-        token_data = TokenData(email=email)
     except JWTError:
         return None
         
-    user = get_user_by_email(db, email=token_data.email)
+    user = get_user_by_email(db, email=email)
     return user
 
 def get_user_by_email(db: Session, email: str):
