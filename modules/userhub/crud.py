@@ -3,6 +3,29 @@ from sqlalchemy.orm import Session
 from . import models, schemas, security
 from sqlalchemy import desc, func
 from typing import Optional
+from jose import JWTError, jwt
+from pydantic import BaseModel, EmailStr
+
+class TokenData(BaseModel):
+    email: Optional[EmailStr] = None
+
+def get_user_from_token(db: Session, token: str) -> Optional[models.User]:
+    """
+    Decodes a JWT token and fetches the corresponding user from the database
+    using a provided session. THIS FUNCTION DOES NOT USE 'Depends'.
+    """
+
+    try:
+        payload = jwt.decode(token, security.SECRET_KEY, algorithms=[security.ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+        token_data = TokenData(email=email)
+    except JWTError:
+        return None
+        
+    user = get_user_by_email(db, email=token_data.email)
+    return user
 
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()

@@ -15,7 +15,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 from modules.userhub.database import SessionLocal
-from modules.userhub.dependencies import get_current_user
+from modules.userhub.crud import get_user_from_token
 from modules.userhub.schemas import User as UserSchema
 from utils.config_loader import settings
 from .event_processor import EventProcessor
@@ -71,7 +71,7 @@ async def websocket_endpoint(
     user: UserSchema = None
     try:
         # Authenticate the user based on the provided token
-        user = await get_current_user(token=token, db=db)
+        user = get_user_from_token(db=db, token=token)
         if not user or not user.is_active:
             # If the token is invalid, close the connection
             await websocket.close(code=status.WS_1008_POLICY_VIOLATION, reason="Invalid credentials or inactive user")
@@ -81,7 +81,7 @@ async def websocket_endpoint(
         await websocket_manager.connect(websocket, user.id)
         
         while True:
-            await websocket.receive_text() # Keep connection alive
+            await asyncio.sleep(1) # Keep connection alive
             
     except WebSocketDisconnect:
         print(f"[WebSocket] Client disconnected cleanly.")

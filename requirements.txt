@@ -28,6 +28,7 @@ alembic
 passlib[bcrypt]
 python-jose[cryptography]
 email-validator
+jose
 
 # --- Dependencies for Unit Testing ---
 pytest
