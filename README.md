@@ -2,7 +2,6 @@
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](./LICENSE)
 > A full-stack, multi-modal, AIOps-enabled platform designed to bring real-time awareness, safety, and intelligence to physical spaces.
-> Lovingly co-created by **Swayam and his wife.**
 
 **NeuraCity** is a complete, modular AI ecosystem that acts as the intelligent core for smart campuses, hospitals, or corporate facilities. It integrates Computer Vision, Conversational AI, and IoT sensor data into a single, cohesive platform that can **see, feel, remember, think, act, and speak.**
 
