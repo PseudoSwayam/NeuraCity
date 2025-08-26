@@ -57,10 +57,10 @@ const LoginPage = () => {
           <div className="flex justify-center mb-4">
             <Logo size="md" showText={false} />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-            NeuraCity
+          <h1 className="text-4xl font-extrabold text-center tracking-wide bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 bg-clip-text text-transparent drop-shadow-md">
+          NeuraCity
           </h1>
-          <p className="text-muted-foreground mt-2">AI Command Center Access</p>
+          <p className="text-muted-foreground mt-2">Admin Dashboard</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
