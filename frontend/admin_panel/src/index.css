@@ -1,0 +1,336 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* NeuraCity - Futuristic Dark Command Center Design System */
+
+@layer base {
+  :root {
+    /* Dark Command Center Theme */
+    --background: 220 27% 8%;
+    --foreground: 180 100% 90%;
+
+    --card: 220 25% 12%;
+    --card-foreground: 180 100% 85%;
+
+    --popover: 220 30% 10%;
+    --popover-foreground: 180 100% 90%;
+
+    --primary: 180 100% 50%;
+    --primary-foreground: 220 30% 8%;
+
+    --secondary: 220 20% 20%;
+    --secondary-foreground: 180 100% 85%;
+
+    --muted: 220 25% 15%;
+    --muted-foreground: 180 50% 60%;
+
+    --accent: 195 100% 60%;
+    --accent-foreground: 220 30% 8%;
+
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --warning: 45 100% 60%;
+    --warning-foreground: 220 30% 8%;
+
+    --success: 120 60% 50%;
+    --success-foreground: 0 0% 98%;
+
+    --border: 220 25% 18%;
+    --input: 220 25% 15%;
+    --ring: 180 100% 50%;
+
+    --radius: 0.75rem;
+
+    /* Futuristic Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(180 100% 50%), hsl(195 100% 60%));
+    --gradient-glow: linear-gradient(135deg, hsl(180 100% 50% / 0.3), hsl(195 100% 60% / 0.1));
+    --gradient-panel: linear-gradient(135deg, hsl(220 25% 12% / 0.8), hsl(220 30% 10% / 0.9));
+    
+    /* Glass Morphism */
+    --glass-bg: hsl(220 25% 12% / 0.1);
+    --glass-border: hsl(180 100% 50% / 0.2);
+    
+    /* Shadows & Glows */
+    --shadow-glow: 0 0 30px hsl(180 100% 50% / 0.3);
+    --shadow-panel: 0 8px 32px hsl(220 30% 5% / 0.5);
+    --shadow-intense: 0 0 60px hsl(180 100% 50% / 0.4);
+
+    /* Animation Timings */
+    --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-glow: box-shadow 0.3s ease-out;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground overflow-hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  /* Glassmorphism Panels */
+  .glass-panel {
+    @apply backdrop-blur-xl border border-primary/20 rounded-xl shadow-2xl;
+    background: linear-gradient(135deg, 
+      hsl(220 25% 12% / 0.15), 
+      hsl(220 30% 10% / 0.25)
+    );
+    box-shadow: 
+      var(--shadow-panel), 
+      inset 0 1px 0 hsl(180 100% 50% / 0.1),
+      0 0 0 1px hsl(180 100% 50% / 0.1);
+  }
+
+  .glass-header {
+    @apply backdrop-blur-xl border border-primary/20 rounded-2xl shadow-lg;
+    background: linear-gradient(135deg, 
+      hsl(220 25% 12% / 0.2), 
+      hsl(220 30% 10% / 0.3)
+    );
+    box-shadow: var(--shadow-panel);
+  }
+
+  .glass-sidebar {
+    @apply glass-panel max-h-screen overflow-y-auto;
+    background: linear-gradient(135deg, 
+      hsl(220 25% 12% / 0.2), 
+      hsl(220 30% 10% / 0.4)
+    );
+  }
+
+  /* Glow Effects */
+  .neura-glow {
+    box-shadow: var(--shadow-glow);
+    transition: var(--transition-glow);
+  }
+
+  .neura-glow:hover {
+    box-shadow: var(--shadow-intense);
+  }
+
+  /* Interactive Elements */
+  .glass-button {
+    @apply backdrop-blur-md border border-primary/30 bg-primary/10 hover:bg-primary/20 transition-all duration-300;
+    box-shadow: var(--shadow-panel);
+  }
+
+  .glass-button:hover {
+    box-shadow: var(--shadow-glow);
+    border-color: hsl(var(--primary) / 0.5);
+  }
+
+  /* Status Indicators */
+  .status-healthy { @apply text-success; }
+  .status-unhealthy { @apply text-destructive; }
+  .status-warning { @apply text-warning; }
+  .status-unknown { @apply text-muted-foreground; }
+
+  /* NeuraCity Theme Classes */
+  .neura-panel {
+    @apply glass-panel;
+  }
+
+  .neura-glass {
+    @apply backdrop-blur-md bg-background/20 border border-primary/30;
+  }
+
+  .neura-pulse {
+    animation: neuraPulse 2s ease-in-out infinite;
+  }
+
+  .neura-float {
+    animation: neuraFloat 6s ease-in-out infinite;
+  }
+
+  /* Animations */
+  .slide-in-right {
+    animation: slideInRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .slide-in-left {
+    animation: slideInLeft 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .fade-in-up {
+    animation: fadeInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  /* Alert Item Animation */
+  .alert-item {
+    @apply glass-panel p-4 cursor-pointer transition-all duration-300 hover:border-primary/40 hover:shadow-lg;
+  }
+
+  .alert-item:hover {
+    transform: translateX(4px);
+    box-shadow: var(--shadow-glow);
+  }
+
+  /* Accordion Styles */
+  .accordion-trigger {
+    @apply flex items-center justify-between w-full p-4 text-left border-b border-primary/20 hover:bg-primary/5 transition-all duration-200;
+  }
+
+  .accordion-content {
+    @apply overflow-hidden transition-all duration-300;
+  }
+}
+
+@layer utilities {
+  /* Gradient Backgrounds */
+  .bg-gradient-primary { background: var(--gradient-primary); }
+  .bg-gradient-glow { background: var(--gradient-glow); }
+  .bg-gradient-panel { background: var(--gradient-panel); }
+
+  /* Custom Transitions */
+  .transition-neura { transition: var(--transition-smooth); }
+  .transition-glow { transition: var(--transition-glow); }
+
+  /* Shadow Utilities */
+  .shadow-neura-intense { box-shadow: var(--shadow-intense); }
+}
+
+/* Keyframe Animations */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes neuraPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes neuraFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-20px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(10px) rotate(-1deg);
+  }
+}
+
+@keyframes neuraPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
+  20%, 40%, 60%, 80% { transform: translateX(4px); }
+}
