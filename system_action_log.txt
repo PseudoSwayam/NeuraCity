@@ -832,3 +832,8 @@
 2025-08-24T22:59:25.531442 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Fire/Smoke Detected)
 2025-08-24T22:59:27.452967 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fall Cam (CRITICAL: Aggressive Movement)
 2025-08-24T22:59:28.297500 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fight Cam (CRITICAL: Aggressive Movement)
+2025-08-26T22:35:06.911538 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Aggressive Movement)
+2025-08-26T22:35:09.759465 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Normal Activity Cam (CRITICAL: Aggressive Movement)
+2025-08-26T22:35:18.204061 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Fire/Smoke Detected)
+2025-08-26T22:35:19.963489 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fall Cam (CRITICAL: Aggressive Movement)
+2025-08-26T22:35:20.760732 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fight Cam (CRITICAL: Aggressive Movement)

@@ -1,210 +1,281 @@
 import React, { useEffect, useRef, useState } from 'react';
-import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { useAlertStore, Alert } from '@/stores/alertStore';
+import { useAuthStore } from '@/stores/authStore';
 
-// Mapbox access token - user needs to provide their own
-// mapboxgl.accessToken = 'your-mapbox-token-here';
+// Hardcoded locations for campus mapping
+const locations: Record<string, [number, number]> = {
+  "LobbyCam-01": [40.7135, -74.0066],
+  "Fall Cam": [40.7135, -74.0066],
+  "Courtyard-01": [40.7145, -74.0055],
+  "Loitering Cam": [40.7145, -74.0055],
+  "Plaza-01": [40.7125, -74.0045],
+  "Abandoned Bag Cam": [40.7125, -74.0045],
+  "Alley-01": [40.7130, -74.0080],
+  "Fight Cam": [40.7130, -74.0080],
+  "Lab-01": [40.7150, -74.0070],
+  "Fire Cam": [40.7150, -74.0070],
+  "Entrance-01": [40.7138, -74.0040],
+  "Normal Activity Cam": [40.7138, -74.0040],
+  "Main Gate": [40.7130, -74.0035],
+  "Main Library": [40.7128, -74.0075],
+  "Iot_pulsenet-01": [40.7140, -74.0060]
+};
+
+// Event styles configuration
+const eventStyles: Record<string, { color: string; icon: string }> = {
+  FALL_DETECTED: { color: '#e74c3c', icon: '🚨' },
+  VIOLENCE_DETECTED: { color: '#e74c3c', icon: '💥' },
+  FIRE_SMOKE_DETECTED: { color: '#f39c12', icon: '🔥' },
+  INTRUSION_DETECTED: { color: '#f39c12', icon: '🚫' },
+  ABANDONED_OBJECT: { color: '#f39c12', icon: '👜' },
+  CV_SECURITY_ALERT: { color: '#e74c3c', icon: '🚨' },
+  NLP_SECURITY_ALERT: { color: '#3498db', icon: '💬' },
+  IOT_SECURITY_ALERT: { color: '#9b59b6', icon: '❤️‍🩹' },
+  IOT_HEART_RATE_HIGH: { color: '#9b59b6', icon: '❤️‍🔥' },
+  IOT_GAS_ALERT: { color: '#9b59b6', icon: '💨' },
+  DEFAULT: { color: '#3498db', icon: 'ℹ️' },
+};
+
+// Filtered event types that should appear on the map
+const mapEventTypes = [
+  'CV_SECURITY_ALERT', 
+  'NLP_SECURITY_ALERT', 
+  'IOT_SECURITY_ALERT', 
+  'FALL_DETECTED', 
+  'VIOLENCE_DETECTED', 
+  'FIRE_SMOKE_DETECTED', 
+  'INTRUSION_DETECTED', 
+  'ABANDONED_OBJECT'
+];
+
+interface MapAlert extends Alert {
+  style: { color: string; icon: string };
+}
+
+// Custom hook to control map flyTo animation
+const FlyToAlert = ({ alert }: { alert: MapAlert | null }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (alert && alert.coordinates) {
+      map.flyTo([alert.coordinates[0], alert.coordinates[1]], 17, {
+        duration: 2,
+        easeLinearity: 0.5
+      });
+    }
+  }, [alert, map]);
+  
+  return null;
+};
+
+// Create custom Leaflet icon
+const createCustomIcon = (style: { color: string; icon: string }) => {
+  return L.divIcon({
+    html: `
+      <div class="relative w-8 h-8 flex items-center justify-center">
+        <div class="absolute inset-0 rounded-full neura-pulse opacity-60" style="background-color: ${style.color}"></div>
+        <div class="absolute inset-1 rounded-full shadow-neura-glow" style="background-color: ${style.color}"></div>
+        <div class="relative z-10 flex items-center justify-center w-6 h-6 rounded-full bg-background text-xs">
+          ${style.icon}
+        </div>
+      </div>
+    `,
+    className: 'neura-marker',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16],
+    popupAnchor: [0, -16]
+  });
+};
 
 const NeuroMap = () => {
-  const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
-  const markersRef = useRef<mapboxgl.Marker[]>([]);
-  const [needsToken, setNeedsToken] = useState(false);
-  const [userToken, setUserToken] = useState('');
+  const [mapAlerts, setMapAlerts] = useState<MapAlert[]>([]);
+  const [latestAlert, setLatestAlert] = useState<MapAlert | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
+  const { alerts, addAlert, setConnectionStatus } = useAlertStore();
+  const { token } = useAuthStore();
 
-  const { alerts } = useAlertStore();
-
+  // WebSocket connection for live alerts
   useEffect(() => {
-    if (!mapContainer.current) return;
+    if (!token) return;
 
-    // Check if Mapbox token is set
-    if (!mapboxgl.accessToken || mapboxgl.accessToken.includes('DEMO') || mapboxgl.accessToken === 'your-mapbox-token-here') {
-      setNeedsToken(true);
-      return;
-    }
+    const connectWebSocket = () => {
+      try {
+        const ws = new WebSocket(`ws://localhost:8003/ws/alerts?token=${token}`);
+        wsRef.current = ws;
 
-    try {
-      // Initialize map with dark theme
-      map.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/dark-v11',
-        center: [-74.0066, 40.7135], // NYC coordinates
-        zoom: 15,
-        pitch: 45,
-        bearing: 0,
-        projection: 'globe' as any,
-      });
+        ws.onopen = () => {
+          console.log('WebSocket connected');
+          setIsConnected(true);
+          setConnectionStatus(true);
+        };
 
-      // Add navigation controls
-      map.current.addControl(
-        new mapboxgl.NavigationControl({
-          visualizePitch: true,
-        }),
-        'top-right'
-      );
+        ws.onmessage = (event) => {
+          try {
+            const alertData = JSON.parse(event.data);
+            
+            // Check if this event type should be displayed on the map
+            const eventType = alertData.raw_event_data?.event_type;
+            if (mapEventTypes.includes(eventType)) {
+              // Find coordinates for this alert
+              const locationKey = alertData.raw_event_data?.payload?.location || 
+                                alertData.raw_event_data?.payload?.camera_id;
+              
+              if (locationKey) {
+                // Find matching location (case-insensitive)
+                const coordinates = Object.entries(locations).find(([key]) => 
+                  key.toLowerCase().includes(locationKey.toLowerCase()) ||
+                  locationKey.toLowerCase().includes(key.toLowerCase())
+                )?.[1];
 
-      // Add atmosphere effect
-      map.current.on('style.load', () => {
-        if (map.current) {
-          map.current.setFog({
-            color: 'hsl(220 27% 8%)',
-            'high-color': 'hsl(180 100% 50%)',
-            'horizon-blend': 0.1,
-          });
-        }
-      });
+                if (coordinates) {
+                  const style = eventStyles[eventType] || eventStyles.DEFAULT;
+                  const newAlert: MapAlert = {
+                    ...alertData,
+                    coordinates,
+                    style
+                  };
 
-      // Clear the token requirement if map loads successfully
-      map.current.on('load', () => {
-        setNeedsToken(false);
-      });
+                  // Add to store
+                  addAlert(newAlert);
+                  
+                  // Update map-specific state
+                  setMapAlerts(prev => [newAlert, ...prev.slice(0, 19)]);
+                  setLatestAlert(newAlert);
+                }
+              }
+            } else {
+              // Still add to general alerts even if not shown on map
+              addAlert(alertData);
+            }
+          } catch (error) {
+            console.error('Error parsing WebSocket message:', error);
+          }
+        };
 
-    } catch (error) {
-      console.error('Mapbox initialization failed:', error);
-      setNeedsToken(true);
-    }
+        ws.onclose = () => {
+          console.log('WebSocket disconnected');
+          setIsConnected(false);
+          setConnectionStatus(false);
+          
+          // Attempt to reconnect after 3 seconds
+          setTimeout(() => {
+            if (token) connectWebSocket();
+          }, 3000);
+        };
 
-    return () => {
-      if (map.current) {
-        map.current.remove();
+        ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          setIsConnected(false);
+          setConnectionStatus(false);
+        };
+
+      } catch (error) {
+        console.error('Failed to connect WebSocket:', error);
+        setIsConnected(false);
+        setConnectionStatus(false);
       }
     };
-  }, [userToken]);
 
-  // Update markers when alerts change
-  useEffect(() => {
-    if (!map.current) return;
+    connectWebSocket();
 
-    // Clear existing markers
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];
-
-    // Add new markers for alerts with coordinates
-    alerts.forEach((alert, index) => {
-      if (alert.coordinates) {
-        const markerElement = createMarkerElement(alert);
-        
-        const marker = new mapboxgl.Marker({
-          element: markerElement,
-          anchor: 'center'
-        })
-          .setLngLat([alert.coordinates[1], alert.coordinates[0]])
-          .addTo(map.current!);
-
-        // Add popup
-        const popup = new mapboxgl.Popup({
-          offset: 25,
-          className: 'neura-popup'
-        }).setHTML(`
-          <div class="neura-panel p-4 text-sm max-w-xs">
-            <div class="font-medium text-primary mb-2">${alert.raw_event_data.event_type}</div>
-            <div class="text-foreground mb-2">${alert.human_readable_message}</div>
-            <div class="text-xs text-muted-foreground">
-              ${new Date(alert.timestamp).toLocaleTimeString()}
-            </div>
-          </div>
-        `);
-
-        marker.setPopup(popup);
-        markersRef.current.push(marker);
-
-        // Fly to newest alert
-        if (index === 0 && map.current) {
-          map.current.flyTo({
-            center: [alert.coordinates[1], alert.coordinates[0]],
-            zoom: 17,
-            pitch: 60,
-            duration: 2000,
-          });
-        }
+    return () => {
+      if (wsRef.current) {
+        wsRef.current.close();
       }
-    });
-  }, [alerts]);
-
-  const createMarkerElement = (alert: Alert) => {
-    const el = document.createElement('div');
-    el.className = 'neura-marker';
-    
-    const severity = getSeverity(alert.raw_event_data.event_type);
-    const color = getSeverityColor(severity);
-    
-    el.innerHTML = `
-      <div class="relative w-8 h-8 flex items-center justify-center">
-        <div class="absolute inset-0 rounded-full ${color} neura-pulse opacity-60"></div>
-        <div class="absolute inset-1 rounded-full ${color} shadow-neura-glow"></div>
-        <div class="relative z-10 w-3 h-3 rounded-full bg-white"></div>
-      </div>
-    `;
-    
-    return el;
-  };
-
-  const getSeverity = (eventType: string): 'high' | 'medium' | 'low' => {
-    if (eventType.includes('CRITICAL') || eventType.includes('SECURITY')) return 'high';
-    if (eventType.includes('WARNING') || eventType.includes('ALERT')) return 'medium';
-    return 'low';
-  };
-
-  const getSeverityColor = (severity: 'high' | 'medium' | 'low'): string => {
-    switch (severity) {
-      case 'high': return 'bg-destructive';
-      case 'medium': return 'bg-warning';
-      case 'low': return 'bg-primary';
-    }
-  };
-
-  const handleTokenSubmit = () => {
-    if (userToken.trim()) {
-      mapboxgl.accessToken = userToken;
-      setNeedsToken(false);
-      // Force re-render
-      window.location.reload();
-    }
-  };
-
-  // Always show the iframe instead of token input
-  return (
-    <div className="relative w-full h-full">
-      <iframe 
-        src="http://localhost:8004/"
-        className="absolute inset-0 w-full h-full border-0 rounded-lg overflow-hidden z-0"
-        title="NeuraCity Map"
-        allow="geolocation"
-      />
-    </div>
-  );
+    };
+  }, [token, addAlert, setConnectionStatus]);
 
   return (
     <div className="relative w-full h-full">
-      <div ref={mapContainer} className="absolute inset-0 rounded-lg overflow-hidden z-0" />
-      
+      {/* Leaflet Map Container */}
+      <MapContainer
+        center={[40.7135, -74.0066]}
+        zoom={15}
+        className="absolute inset-0 w-full h-full z-0"
+        zoomControl={false}
+        attributionControl={false}
+      >
+        {/* CartoDB Dark Matter Tiles */}
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          subdomains={['a', 'b', 'c', 'd']}
+        />
+        
+        {/* Map Alert Markers */}
+        {mapAlerts.map((alert, index) => (
+          <Marker
+            key={`${alert.id}-${index}`}
+            position={[alert.coordinates![0], alert.coordinates![1]]}
+            icon={createCustomIcon(alert.style)}
+          >
+            <Popup className="neura-popup">
+              <div className="neura-panel p-3 text-sm max-w-xs bg-background border border-border rounded-lg">
+                <div className="font-medium text-primary mb-2 flex items-center gap-2">
+                  <span>{alert.style.icon}</span>
+                  {alert.raw_event_data.event_type}
+                </div>
+                <div className="text-foreground mb-2">{alert.human_readable_message}</div>
+                <div className="text-xs text-muted-foreground">
+                  {new Date(alert.timestamp).toLocaleString()}
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+        
+        {/* Auto-fly to latest alert */}
+        <FlyToAlert alert={latestAlert} />
+      </MapContainer>
+
       {/* Map Overlay UI */}
-      <div className="absolute top-4 left-4 neura-panel p-4 backdrop-blur-sm">
+      <div className="absolute top-4 left-4 neura-panel p-4 backdrop-blur-sm z-10">
         <h2 className="text-lg font-semibold text-primary mb-2">NeuroMap</h2>
-        <div className="text-sm text-muted-foreground">
-          <div>Active Alerts: <span className="text-foreground font-mono">{alerts.length}</span></div>
+        <div className="text-sm text-muted-foreground space-y-1">
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-success neura-pulse' : 'bg-destructive'}`}></div>
+            <span>{isConnected ? 'LIVE' : 'DISCONNECTED'}</span>
+          </div>
+          <div>Active Alerts: <span className="text-foreground font-mono">{mapAlerts.length}</span></div>
           <div>Coverage: <span className="text-success">98.7%</span></div>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 neura-panel p-3 backdrop-blur-sm">
-        <div className="text-xs text-muted-foreground mb-2">Alert Severity</div>
+      <div className="absolute bottom-4 left-4 neura-panel p-3 backdrop-blur-sm z-10">
+        <div className="text-xs text-muted-foreground mb-2">Alert Types</div>
         <div className="space-y-1 text-xs">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-destructive"></div>
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#e74c3c' }}></div>
             <span>Critical</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-warning"></div>
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#f39c12' }}></div>
             <span>Warning</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-primary"></div>
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#9b59b6' }}></div>
+            <span>IoT</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3498db' }}></div>
             <span>Info</span>
           </div>
         </div>
+      </div>
+
+      {/* Zoom Controls */}
+      <div className="absolute top-4 right-4 flex flex-col gap-1 z-10">
+        <button className="neura-panel p-2 hover:bg-muted transition-colors">
+          <span className="text-lg">+</span>
+        </button>
+        <button className="neura-panel p-2 hover:bg-muted transition-colors">
+          <span className="text-lg">−</span>
+        </button>
       </div>
     </div>
   );
