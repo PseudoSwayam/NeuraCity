@@ -81,7 +81,11 @@ const AnalyticsCharts = ({ type }: AnalyticsChartsProps) => {
             headers, 
             timeout: 10000 
           });
-          setAnomalies(response.data);
+          // Sort anomalies by timestamp (latest first)
+          const sortedAnomalies = response.data.sort((a: Anomaly, b: Anomaly) => 
+            new Date(b.timestamp_hour).getTime() - new Date(a.timestamp_hour).getTime()
+          );
+          setAnomalies(sortedAnomalies);
         }
 
       } catch (error) {
@@ -201,6 +205,10 @@ const AnalyticsCharts = ({ type }: AnalyticsChartsProps) => {
                 color: 'hsl(var(--foreground))',
                 fontSize: '12px'
               }}
+              formatter={(value, name, props) => [
+                `${value} events`,
+                props.payload?.module || 'Source'
+              ]}
             />
           </PieChart>
         </ResponsiveContainer>

@@ -855,3 +855,5 @@
 2025-08-27T11:34:01.245632 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Normal Activity Cam (CRITICAL: Aggressive Movement)
 2025-08-27T11:41:46.129117 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Fire Cam (CRITICAL: Aggressive Movement)
 2025-08-27T11:41:55.179707 - [HIGH-PRIORITY SECURITY ALERT] Dispatched to: Normal Activity Cam (CRITICAL: Aggressive Movement)
+2025-08-27T11:48:33.039725 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
+2025-08-27T11:58:34.765106 - [DEPT NOTIFICATION] Sent to SRE_Team: CRITICAL SYSTEM ALERT: The 'cv_watchtower' module is unresponsive and has been unhealthy for over 10 minutes. Please investigate immediately.
