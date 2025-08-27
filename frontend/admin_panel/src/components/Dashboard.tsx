@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuthStore } from '@/stores/authStore';
+import { useAlertStore } from '@/stores/alertStore';
 import { Navigate } from 'react-router-dom';
 import { ChevronDown, ChevronRight, LogOut, User, Activity, TrendingUp, AlertTriangle, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import Logo from './Logo';
 
 const Dashboard = () => {
   const { isAuthenticated, logout, user } = useAuthStore();
+  const { lastAlert, showToast } = useAlertStore();
   const [healthOpen, setHealthOpen] = useState(true);
   const [trendsOpen, setTrendsOpen] = useState(false);
   const [modulesOpen, setModulesOpen] = useState(false);
@@ -139,6 +141,23 @@ const Dashboard = () => {
           </Collapsible>
         </div>
       </div>
+
+      {/* Global Toast Notification */}
+      {showToast && lastAlert && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 neura-toast max-w-md">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-warning mt-0.5 flex-shrink-0" />
+            <div>
+              <div className="font-medium text-foreground">
+                {lastAlert.raw_event_data.event_type.replace(/_/g, ' ')}
+              </div>
+              <div className="text-sm text-muted-foreground mt-1">
+                {lastAlert.human_readable_message}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

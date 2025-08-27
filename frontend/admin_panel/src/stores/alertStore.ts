@@ -17,9 +17,13 @@ export interface Alert {
 interface AlertState {
   alerts: Alert[];
   isConnected: boolean;
+  lastAlert: Alert | null;
+  showToast: boolean;
   addAlert: (alert: Alert) => void;
   setConnectionStatus: (connected: boolean) => void;
   clearAlerts: () => void;
+  setLastAlert: (alert: Alert | null) => void;
+  setShowToast: (show: boolean) => void;
 }
 
 // Hardcoded locations for camera mapping
@@ -34,6 +38,8 @@ const CAMERA_LOCATIONS: Record<string, [number, number]> = {
 export const useAlertStore = create<AlertState>((set, get) => ({
   alerts: [],
   isConnected: false,
+  lastAlert: null,
+  showToast: false,
 
   addAlert: (alert) => {
     // Extract camera ID from location and get coordinates
@@ -58,5 +64,13 @@ export const useAlertStore = create<AlertState>((set, get) => ({
 
   clearAlerts: () => {
     set({ alerts: [] });
+  },
+
+  setLastAlert: (alert) => {
+    set({ lastAlert: alert });
+  },
+
+  setShowToast: (show) => {
+    set({ showToast: show });
   },
 }));

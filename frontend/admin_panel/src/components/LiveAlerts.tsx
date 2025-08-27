@@ -6,11 +6,9 @@ import { Wifi, WifiOff, AlertTriangle, Clock } from 'lucide-react';
 const LiveAlerts = () => {
   const ws = useRef<WebSocket | null>(null);
   const [reconnectAttempts, setReconnectAttempts] = useState(0);
-  const [lastAlert, setLastAlert] = useState<Alert | null>(null);
-  const [showToast, setShowToast] = useState(false);
 
   const { token } = useAuthStore();
-  const { addAlert, setConnectionStatus, isConnected, alerts } = useAlertStore();
+  const { addAlert, setConnectionStatus, isConnected, alerts, setLastAlert, setShowToast } = useAlertStore();
 
   const connectWebSocket = () => {
     if (!token) {
@@ -177,22 +175,6 @@ const LiveAlerts = () => {
         )}
       </div>
 
-      {/* Toast Notification */}
-      {showToast && lastAlert && (
-        <div className="fixed bottom-6 right-6 z-50 neura-toast max-w-md">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-warning mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium text-foreground">
-                {lastAlert.raw_event_data.event_type.replace(/_/g, ' ')}
-              </div>
-              <div className="text-sm text-muted-foreground mt-1">
-                {lastAlert.human_readable_message}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
