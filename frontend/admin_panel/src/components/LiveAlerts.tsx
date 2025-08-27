@@ -31,8 +31,11 @@ const LiveAlerts = () => {
         try {
           const data = JSON.parse(event.data);
           
+          // Create unique ID based on message content to prevent duplicates
+          const uniqueId = `${data.human_readable_message}-${Date.now()}`;
+          
           const alert: Alert = {
-            id: `${Date.now()}-${Math.random()}`,
+            id: uniqueId,
             timestamp: Date.now(),
             human_readable_message: data.human_readable_message,
             raw_event_data: data.raw_event_data,
@@ -76,11 +79,18 @@ const LiveAlerts = () => {
   };
 
   useEffect(() => {
+    // Cleanup any existing connection first
+    if (ws.current) {
+      ws.current.close();
+      ws.current = null;
+    }
+
     connectWebSocket();
 
     return () => {
       if (ws.current) {
         ws.current.close();
+        ws.current = null;
       }
     };
   }, [token]);
@@ -121,8 +131,15 @@ const LiveAlerts = () => {
         ) : (
           alerts.slice(0, 20).map((alert) => {
             const getTimeAgo = (timestamp: number) => {
+              // Handle invalid timestamps
+              if (!timestamp || isNaN(timestamp)) return 'Unknown time';
+              
               const now = Date.now();
               const diff = now - timestamp;
+              
+              // Handle negative differences (future timestamps)
+              if (diff < 0) return 'Just now';
+              
               const minutes = Math.floor(diff / (1000 * 60));
               
               if (minutes < 1) return 'Just now';

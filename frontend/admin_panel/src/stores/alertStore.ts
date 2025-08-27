@@ -42,6 +42,12 @@ export const useAlertStore = create<AlertState>((set, get) => ({
   showToast: false,
 
   addAlert: (alert) => {
+    // Check if alert with same ID already exists to prevent duplicates
+    const state = get();
+    if (state.alerts.some(existingAlert => existingAlert.id === alert.id)) {
+      return;
+    }
+
     // Extract camera ID from location and get coordinates
     const cameraId = alert.raw_event_data.payload.camera_id || 
                     alert.raw_event_data.payload.location.split(' ')[0];
