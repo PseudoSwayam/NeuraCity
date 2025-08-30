@@ -85,6 +85,8 @@ alembic upgrade head
 # Run all of the Docker Servers
 docker start neuracity-postgres #PostgreSQL Server
 docker start redis-stack-server #Redis Server for Alerts & Notifications
+docker exec -it redis-stack-server redis-cli
+  >SUBSCRIBE campus_notifications
 ```
 
 ```bash
