@@ -30,7 +30,7 @@ node_modules/
 *.sav
 
 # Project Folders
-models/
+modules/cv_watchtower/models
 datasets/
 logs/
 outputs/
