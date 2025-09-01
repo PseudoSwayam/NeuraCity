@@ -4,93 +4,139 @@
 
 ---
 
-## 1. **Project Vision & Purpose**
+![NeuraApp Banner](https://via.placeholder.com/1280x300.png/121212/42A5F5?text=NeuraApp)
 
-`NeuraApp` is the primary mobile interface for students and staff of the NeuraCity smart campus. It is a secure, personalized, and context-aware application that acts as a helpful companion for campus life.
+**NeuraApp is the official, user-facing mobile application for the NeuraCity smart campus platform. Built natively in Swift & SwiftUI for iOS, it provides a secure, personalized, and context-aware companion for campus users.**
 
-Unlike the operator-focused Admin Dashboard, `NeuraApp` is designed to be user-centric. Its goals are to provide convenience, deliver timely and relevant information, and enhance the safety and well-being of every individual on campus.
-
-## 2. **Core Architectural Requirements**
-
-*   **Technology Stack**: A modern mobile framework like `Flutter`, or native `SwiftUI`/`Kotlin`.
-*   **Authentication**: The app **must** have a secure login flow. All subsequent API calls to the NeuraCity backend must be authenticated using the **JWT Bearer Token** obtained from the `UserHub` login endpoint.
-*   **Real-Time Push Notifications**: The app must be able to receive critical alerts (e.g., "Fire detected in your building!") even when it is not running in the foreground. This will be implemented using a dedicated Push Notification service.
-*   **Personalization**: The app experience must be tailored to the logged-in user's role (`student`, `staff`, etc.) and their personal data stored in `UserHub`.
-
----
-
-## 3. **Step-by-Step Feature Implementation Guide**
-
-This section breaks down the app's features screen-by-screen.
-
-### **Feature 1: Secure Login & Onboarding**
-
-*   **UI Components:**
-    *   Splash Screen
-    *   Email & Password Login Screen
-*   **Core Logic:**
-    1.  This flow is **identical** to the Admin Dashboard's login. The app will make a `POST` request to `http://<your_server_ip>:8005/auth/token`.
-    2.  Upon a successful login, the received JWT `access_token` and a `refresh_token` (a great future addition to `UserHub`) must be stored securely in the device's keychain or secure storage.
-    3.  **Push Notification Registration**: After a successful login, the app must:
-        *   Ask the user for permission to receive push notifications.
-        *   Get the device's unique push notification token from the operating system (e.g., from Firebase Cloud Messaging or Apple Push Notification Service).
-        *   Send this device token to a (future) `UserHub` endpoint (e.g., `POST /users/me/register-device`) to associate this specific phone with the logged-in user.
-
----
-
-### **Feature 2: The Main Dashboard Screen (Personalized View)**
-
-This is the home screen of the app. It's a personalized summary of what's relevant to the user right now.
-
-*   **UI Components:**
-    *   A "Welcome, [User's Full Name]!" greeting.
-    *   A status card: "Your Current Status: **Checked In** at Main Library".
-    *   A summary of upcoming events or classes.
-    *   A button to talk to the NeuraNLP agent.
-*   **Backend Integration:**
-    1.  **Get User Profile**: On load, the app will make a `GET` request to `http://<your_server_ip>:8005/users/me` (with the JWT token) to fetch the user's `full_name`.
-    2.  **Get Attendance Status**: The app will call a (future) `UserHub` endpoint like `GET /attendance/my-status` to get the user's latest check-in location and time.
-    3.  **(Future)** It would query an `Academic Calendar` service to get schedule information.
-
----
-
-### **Feature 3: The Conversational AI Assistant (`NeuraNLP_Agent`)**
-
-This is the "magic" feature of the app.
-
-*   **UI Components:**
-    *   A chat interface (like WhatsApp or Messenger).
-    *   A text input field and a microphone button for voice input.
-*   **Core Logic:**
-    1.  The user types a query (e.g., "Where is Professor Sahoo's office?").
-    2.  The app makes a `POST` request to the `neuranlp_agent` at `http://<your_server_ip>:8000/query`.
-    3.  **Crucially, it includes the user's JWT in the `Authorization` header.** This is how the agent can perform privileged actions on behalf of the user in the future.
-    4.  The JSON response's `response` text is displayed as a new message in the chat UI.
-    5.  **(Voice Input)** If the user taps the microphone, the app will record a short audio clip, send it as a `file` in the `multipart/form-data` request, and set `mode=voice`. The agent's audio response (`audio_output`) will be played back through the phone's speaker.
-
----
-
-### **Feature 4: Receiving Real-Time Push Notifications**
-
-This is the most critical safety feature. It does not happen "in-app" but is a core part of the app's functionality.
-
-#### **How it is Architected:**
-
-The mobile app itself **does not** maintain a persistent WebSocket connection. Instead, it relies on the OS-level push notification system, which is integrated via your `alerts_and_notifications` module's **Webhook Channel**.
-
-**The End-to-End Data Flow for a Mobile Alert:**
+The app features real-time campus alerts, a live interactive map, and a direct line to the NeuraNLP conversational AI agent, all wrapped in a clean, modern, and intuitive dark-mode interface.
 
 <p align="center">
   <img src="diagram.svg" alt="Schema" width="600">
 </p>
 
----
+## Table of Contents
 
-## Why this is a Great Feature to Demo:
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Backend Dependencies](#backend-dependencies)
+- [Setup & Configuration](#setup--configuration)
+  - [Prerequisites](#prerequisites)
+  - [Configuration](#configuration)
+  - [Running the App](#running-the-app)
+- [API Contract Summary](#api-contract-summary)
 
-- Start all your backend services.
-- Run the cv_watchtower and have it detect the fire_test.mp4.
-- You will see a log in the alerts_and_notifications terminal: [WebhookChannel] Successfully sent notification...
-- A frontend developer can point this webhook to a test service and immediately see the structured event payload, proving that the entire backend pipeline for sending targeted, critical mobile alerts is fully functional.
+## Features
 
-### This guide provides a complete and professional roadmap for your mobile development team. It defines a clear set of features and outlines the precise, robust integration patterns needed to connect NeuraApp to the powerful NeuraCity backend you have built.
+*   **Secure Authentication:** JWT-based login against the NeuraCity UserHub. Tokens are stored securely in the device's Keychain.
+*   **Personalized Dashboard:** A welcoming home screen that greets the user by name and presents critical, real-time information.
+*   **Live Alerts Feed:** A real-time, animated list of campus alerts received via a persistent WebSocket connection.
+*   **Interactive NeuroMap:** A live map that visualizes map-worthy alerts with animated markers, automatically centering on the latest critical event. The system intelligently uses live GPS data when available or falls back to a static database of known locations.
+*   **NeuraNLP Chat AI:** A full-featured chat interface for seamless communication with the NeuraNLP conversational AI.
+
+## Tech Stack
+
+This project is built using Apple's latest and most powerful native technologies to ensure the highest level of performance, security, and UI fluidity.
+
+| Category | Technology | Purpose |
+| :--- | :--- | :--- |
+| **Platform** | iOS | Target operating system |
+| **Language** | Swift | Core application language |
+| **UI Framework** | SwiftUI | Modern, declarative UI and animations |
+| **Mapping** | MapKit | Native, hardware-accelerated maps |
+| **State Management** | SwiftUI (`@StateObject`, `@EnvironmentObject`) | Clean, scalable state management |
+| **Networking** | `URLSession` (Async/Await) | All REST API and WebSocket communication |
+| **Secure Storage**| Keychain | Securely storing the user's JWT |
+| **Build System** | Xcode | Native IDE and build environment |
+
+## Project Structure
+
+The project adheres to a clean, MVVM-like architecture to separate concerns and promote scalability.
+
+```
+NeuraApp/
+├── Models/
+│   ├── Alert.swift
+│   ├── ChatMessage.swift
+│   ├── User.swift
+│   └── LoginResponse.swift
+├── Views/
+│   ├── ContentView.swift
+│   ├── LoginView.swift
+│   ├── MainTabView.swift
+│   ├── HomeView.swift
+│   ├── ChatView.swift
+│   └── MapView.swift
+├── ViewModels/
+│   ├── AuthViewModel.swift
+│   └── ChatViewModel.swift
+├── Services/
+│   ├── ApiService.swift
+│   ├── KeychainService.swift
+│   ├── WebSocketService.swift
+│   └── LocationManager.swift
+└── Utils/
+    ├── Constants.swift
+    └── Color+Extensions.swift
+```
+
+## Backend Dependencies
+
+NeuraApp requires the NeuraCity backend services to be running on the same local network as the development Mac and the iOS Simulator. The following modules must be active:
+
+*   **UserHub (Identity):** `http://<your_server_ip>:8005`
+*   **NeuraNLP Agent:** `http://<your_server_ip>:8000`
+*   **Alerts & Notifications:** `ws://<your_server_ip>:8003`
+
+## Setup & Configuration
+
+Follow these steps to get the NeuraApp running in the iOS Simulator.
+
+### Prerequisites
+
+*   A Mac with an Apple Silicon (M1/M2/M3) or Intel processor.
+*   The latest version of [Xcode](https://developer.apple.com/xcode/) installed from the App Store.
+*   The NeuraCity backend services must be running.
+
+### Configuration
+
+The only configuration file you need to edit is `Constants.swift`.
+
+1.  **Find Your Mac's Local IP Address:**
+    *   Go to **System Settings > Wi-Fi**.
+    *   Click **"Details..."** next to your connected network.
+    *   Go to the **TCP/IP** tab and find your "IP Address" (e.g., `192.168.1.123`).
+
+2.  **Update the Constants File:**
+    *   Open the NeuraApp project in Xcode.
+    *   Navigate to `NeuraApp/Utils/Constants.swift`.
+    *   Change the value of the `serverIP` constant to the IP address you found.
+
+    ```swift
+    // For testing on a REAL iPhone, change "localhost" to your Mac's IP.
+    // For the iOS Simulator, "localhost" (127.0.0.1) is sufficient.
+    static let serverIP = "127.0.0.1" // Or "192.168.1.123"
+    ```
+
+### Running the App
+
+1.  Open the project by double-clicking the `NeuraApp.xcodeproj` file.
+2.  At the top of the Xcode window, select an iOS Simulator (e.g., "iPhone 15 Pro").
+3.  Press the **Play** button in the top-left corner, or use the keyboard shortcut **`Cmd + R`**.
+4.  The app will build and launch in the simulator.
+
+Default login credentials for testing:
+*   **Email:** `swayam@neuracity.dev`
+*   **Password:** `password`
+
+## API Contract Summary
+
+The app communicates with a set of local backend services. All secure endpoints require an `Authorization: Bearer <JWT>` header.
+
+| Module | Endpoint | Method | Path |
+| :--- | :--- | :--- | :--- |
+| **UserHub**| User Login | `POST` | `/auth/token`|
+| | Get My Profile| `GET` | `/users/me`|
+| | Check-In | `POST` | `/attendance/check-in`|
+| **NeuraNLP**| Submit Query | `POST`| `/query`|
+| **Alerts** | Live Feed | `WebSocket` | `/ws/alerts`|
