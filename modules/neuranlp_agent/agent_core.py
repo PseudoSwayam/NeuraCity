@@ -103,9 +103,9 @@ class AgentCore:
                 description="Use this tool to get a health summary of all NeuraCity modules. Requires admin privileges. Takes no input."
             ),
             Tool.from_function(
-                func=lambda dummy_input: api_triggers.get_on_campus_users(),
+                func=api_triggers.get_on_campus_users,
                 name="CheckCampusAttendance",
-                description="Use to find out which users are currently checked-in on campus. Takes no input."
+                description="Use to find out who is checked-in on campus. Takes no input."
             ),
             # Unsecured tools
             Tool(name="SearchKnowledgeBase", func=self.memory_core.vector.query, description="Use for factual questions from campus documents."),

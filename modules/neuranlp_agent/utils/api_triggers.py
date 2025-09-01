@@ -90,7 +90,7 @@ def get_system_health_summary(dummy_input: str = "", token: Optional[str] = None
         return f"Failed to get system health data from InsightCloud: {e}"
 
 
-def get_on_campus_users(dummy_input: str = "") -> str:
+def get_on_campus_users(input_arg: str = "") -> str:
     """
     Makes an API call to UserHub to get a list of all users
     who are currently checked in.
@@ -103,7 +103,7 @@ def get_on_campus_users(dummy_input: str = "") -> str:
         if not users:
             return "No users are currently checked in on campus."
         # Format the response for the LLM
-        user_names = [user['full_name'] for user in users]
+        user_names = [user.get('full_name', 'Unknown User') for user in users]
         return f"The following users are currently on campus: {', '.join(user_names)}."
     except requests.exceptions.RequestException as e:
         return f"Failed to get attendance data: {e}"
