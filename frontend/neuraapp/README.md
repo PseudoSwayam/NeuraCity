@@ -1,6 +1,6 @@
 # 📱 NeuraApp: The Smart Campus in Your Pocket
 
-> This document is the official technical specification and developer guide for the NeuraCity companion mobile application.
+> The Smart Campus Companion
 
 ---
 
