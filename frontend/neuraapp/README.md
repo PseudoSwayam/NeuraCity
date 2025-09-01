@@ -45,7 +45,7 @@ This project is built using Apple's latest and most powerful native technologies
 | **UI Framework** | SwiftUI | Modern, declarative UI and animations |
 | **Mapping** | MapKit | Native, hardware-accelerated maps |
 | **State Management** | SwiftUI (`@StateObject`, `@EnvironmentObject`) | Clean, scalable state management |
-| **Networking** | `URLSession` (Async/Await) | All REST API and WebSocket communication |
+| **Networking** | `URLSession` (Async) | All REST API and WebSocket communication |
 | **Secure Storage**| Keychain | Securely storing the user's JWT |
 | **Build System** | Xcode | Native IDE and build environment |
 
