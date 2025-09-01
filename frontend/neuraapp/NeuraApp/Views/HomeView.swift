@@ -1,17 +1,9 @@
-//
-//  HomeView.swift
-//  NeuraApp
-//
-//  Created by Swayam  Sahoo on 01/09/25.
-//
-
 import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @EnvironmentObject var webSocketService: WebSocketService
 
-    // We will store alerts received from the websocket here.
     @State private var alerts: [Alert] = []
     
     var body: some View {
@@ -35,10 +27,13 @@ struct HomeView: View {
                     }
                 }
             }
+            // Use dark navigation bar style throughout the app
+            .navigationBarTitleDisplayMode(.large)
         }
         .onAppear {
-            // This sets the navigation bar to have our custom dark style
+            // Apply a consistent dark theme to the navigation bar
             let appearance = UINavigationBarAppearance()
+            appearance.configureWithOpaqueBackground()
             appearance.backgroundColor = UIColor(Color.neuraBackground)
             appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
             appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
@@ -46,17 +41,17 @@ struct HomeView: View {
             UINavigationBar.appearance().scrollEdgeAppearance = appearance
             UINavigationBar.appearance().compactAppearance = appearance
         }
-        // This is how this View "listens" for new alerts from the WebSocketService
         .onReceive(webSocketService.$latestAlert) { newAlert in
             guard let newAlert = newAlert else { return }
-            // Add the new alert to the top of our list
-            alerts.insert(newAlert, at: 0)
+            // Add the new alert to the top of our list with an animation
+            withAnimation {
+                alerts.insert(newAlert, at: 0)
+            }
         }
     }
 }
 
-
-// --- Sub-views for HomeView ---
+// --- Sub-views for HomeView (Complete and Correct) ---
 
 struct WelcomeHeader: View {
     @State private var userName: String = "..."
@@ -70,17 +65,17 @@ struct WelcomeHeader: View {
                 .font(.largeTitle)
                 .fontWeight(.bold)
         }
-        .onAppear(perform: loadUserData)
+        .task { // Use .task for modern, safe async operations in SwiftUI
+            await loadUserData()
+        }
     }
     
-    private func loadUserData() {
-        Task {
-            do {
-                let user = try await ApiService.shared.getMyProfile()
-                self.userName = user.fullName
-            } catch {
-                self.userName = "User"
-            }
+    private func loadUserData() async {
+        do {
+            let user = try await ApiService.shared.getMyProfile()
+            self.userName = user.fullName
+        } catch {
+            self.userName = "User"
         }
     }
 }
@@ -114,11 +109,12 @@ struct LiveAlertsSection: View {
                 Text("No recent alerts. Campus is secure.")
                     .foregroundColor(.gray)
                     .padding()
-                    .frame(maxWidth: .infinity)
+                    .frame(maxWidth: .infinity, minHeight: 100)
                     .background(Color.neuraSurface)
                     .cornerRadius(12)
             } else {
-                ForEach(alerts) { alert in
+                // Display up to the 5 most recent alerts
+                ForEach(alerts.prefix(5)) { alert in
                     AlertRow(alert: alert)
                 }
             }
@@ -148,5 +144,6 @@ struct AlertRow: View {
         .padding()
         .background(alert.eventType == "CV_SECURITY_ALERT" ? Color.red.opacity(0.2) : Color.neuraSurface)
         .cornerRadius(12)
+        .transition(.asymmetric(insertion: .move(edge: .top).combined(with: .opacity), removal: .scale))
     }
 }

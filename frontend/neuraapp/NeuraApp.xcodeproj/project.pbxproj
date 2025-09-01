@@ -42,6 +42,7 @@
 				NeuraAppApp.swift,
 				Services/ApiService.swift,
 				Services/KeychainService.swift,
+				Services/LocationManager.swift,
 				Services/WebSocketService.swift,
 				"Utils/Color+Extensions.swift",
 				Utils/Constants.swift,
