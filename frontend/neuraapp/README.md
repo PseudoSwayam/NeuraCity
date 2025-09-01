@@ -121,7 +121,7 @@ The only configuration file you need to edit is `Constants.swift`.
 ### Running the App
 
 1.  Open the project by double-clicking the `NeuraApp.xcodeproj` file.
-2.  At the top of the Xcode window, select an iOS Simulator (e.g., "iPhone 15 Pro").
+2.  At the top of the Xcode window, select an iOS Simulator (e.g., "iPhone 16 Pro").
 3.  Press the **Play** button in the top-left corner, or use the keyboard shortcut **`Cmd + R`**.
 4.  The app will build and launch in the simulator.
 
