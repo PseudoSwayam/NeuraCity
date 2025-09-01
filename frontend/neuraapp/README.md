@@ -125,10 +125,6 @@ The only configuration file you need to edit is `Constants.swift`.
 3.  Press the **Play** button in the top-left corner, or use the keyboard shortcut **`Cmd + R`**.
 4.  The app will build and launch in the simulator.
 
-Default login credentials for testing:
-*   **Email:** `swayam@neuracity.dev`
-*   **Password:** `password`
-
 ## API Contract Summary
 
 The app communicates with a set of local backend services. All secure endpoints require an `Authorization: Bearer <JWT>` header.
