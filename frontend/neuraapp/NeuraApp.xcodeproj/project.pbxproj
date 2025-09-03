@@ -49,6 +49,7 @@
 				Utils/Constants.swift,
 				ViewModels/AuthViewModel.swift,
 				ViewModels/ChatViewModel.swift,
+				Views/AnimatedBlobBackground.swift,
 				Views/ChatView.swift,
 				Views/FrostedGlassView.swift,
 				Views/HomeView.swift,

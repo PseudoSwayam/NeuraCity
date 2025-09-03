@@ -42,3 +42,4 @@ struct MainTabView: View {
         .environmentObject(webSocketService)
     }
 }
+

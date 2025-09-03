@@ -8,10 +8,9 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
-            // Add a subtle radial gradient to the background for depth
-            RadialGradient(gradient: Gradient(colors: [.neuraSurface, .neuraBackground]), center: .center, startRadius: 5, endRadius: 500)
-                .ignoresSafeArea()
-
+            
+            AnimatedBlobBackground()
+            
             VStack(spacing: 20) {
                 Spacer()
                 
@@ -92,3 +91,4 @@ struct LoginView: View {
         }
     }
 }
+
