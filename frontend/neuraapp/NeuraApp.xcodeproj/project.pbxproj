@@ -43,6 +43,7 @@
 				Services/ApiService.swift,
 				Services/KeychainService.swift,
 				Services/LocationManager.swift,
+				Services/NotificationService.swift,
 				Services/WebSocketService.swift,
 				"Utils/Color+Extensions.swift",
 				Utils/Constants.swift,

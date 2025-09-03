@@ -20,6 +20,7 @@ class AuthViewModel: ObservableObject {
     // Dependencies
     private let apiService = ApiService.shared
     private let keychainService = KeychainService.shared
+    private let notificationService = NotificationService.shared
     
     init() {
         // Check if a token already exists when the app starts.
@@ -47,8 +48,11 @@ class AuthViewModel: ObservableObject {
             // 3. Get user profile to perform check-in.
             let user = try await apiService.getMyProfile()
             try await apiService.performCheckIn(forUser: user)
+            
+            // 4. Notification Permission
+            notificationService.requestPermission()
 
-            // 4. Update the UI state.
+            // 5. Update the UI state.
             isAuthenticated = true
         } catch let error as APIError {
             errorMessage = error.localizedDescription

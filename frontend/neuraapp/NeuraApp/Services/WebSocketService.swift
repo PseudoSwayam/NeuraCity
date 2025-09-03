@@ -8,6 +8,7 @@ class WebSocketService: NSObject, ObservableObject, URLSessionWebSocketDelegate 
 
     private var webSocketTask: URLSessionWebSocketTask?
     private let keychainService = KeychainService.shared
+    private let notificationService = NotificationService.shared
     
     private let jsonDecoder: JSONDecoder = {
         let decoder = JSONDecoder()
@@ -71,6 +72,7 @@ class WebSocketService: NSObject, ObservableObject, URLSessionWebSocketDelegate 
         
         do {
             let alert = try self.jsonDecoder.decode(Alert.self, from: data)
+            notificationService.scheduleNotification(for: alert)
             self.latestAlert = alert
         } catch {
             print("WebSocket Decode Error: \(error.localizedDescription)")
