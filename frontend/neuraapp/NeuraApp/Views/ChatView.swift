@@ -8,48 +8,62 @@
 import SwiftUI
 
 struct ChatView: View {
-    // Create an instance of the view model specific to this view.
     @StateObject private var viewModel = ChatViewModel()
     @State private var messageText: String = ""
 
     var body: some View {
         VStack {
             // Conversation History
-            ScrollView {
-                VStack {
-                    ForEach(viewModel.messages) { message in
-                        MessageView(message: message)
+            ScrollViewReader { scrollViewProxy in
+                ScrollView {
+                    VStack(spacing: 12) {
+                        ForEach(viewModel.messages) { message in
+                            MessageView(message: message)
+                                .id(message.id) // Assign an ID to each message
+                        }
+                        if viewModel.isThinking {
+                            MessageView(message: ChatMessage(text: "", author: .agent, isLoading: true))
+                        }
                     }
-                    if viewModel.isThinking {
-                        MessageView(message: ChatMessage(text: "", author: .agent, isLoading: true))
+                    .padding(.top)
+                }
+                // When new messages are added, automatically scroll to the bottom
+                .onChange(of: viewModel.messages.count) { _ in
+                    if let lastMessageId = viewModel.messages.last?.id {
+                        withAnimation {
+                            scrollViewProxy.scrollTo(lastMessageId, anchor: .bottom)
+                        }
                     }
                 }
             }
             
             // Text Input Field
-            HStack {
-                TextField("Ask NeuraNLP...", text: $messageText)
+            HStack(spacing: 16) {
+                TextField("Ask NeuraNLP...", text: $messageText, onCommit: sendMessage)
                     .padding()
-                    .background(Color.neuraSurface)
-                    .cornerRadius(10)
+                    .background(FrostedGlassView()) // Use Frosted Glass for the text field
+                    .cornerRadius(20)
 
                 Button(action: sendMessage) {
                     Image(systemName: "arrow.up.circle.fill")
-                        .font(.largeTitle)
-                        .foregroundColor(.neuraPrimary)
+                        .font(.system(size: 36))
+                        .foregroundStyle(Color.neuraPrimaryGradient) // Use gradient
                 }
+                .disabled(messageText.isEmpty)
             }
             .padding()
         }
-        .background(Color.neuraBackground)
+        .background(Color.neuraBackground.ignoresSafeArea())
     }
     
     func sendMessage() {
-        guard !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        let tempMessage = messageText
-        messageText = ""
+        let trimmedMessage = messageText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedMessage.isEmpty else { return }
+        
+        messageText = "" // Clear the text field immediately
+        
         Task {
-            await viewModel.sendMessage(tempMessage)
+            await viewModel.sendMessage(trimmedMessage)
         }
     }
 }
@@ -61,32 +75,66 @@ struct MessageView: View {
     var body: some View {
         HStack {
             if message.author == .user {
-                Spacer()
+                Spacer(minLength: 50)
             }
             
             if message.isLoading {
-                // "Thinking" indicator
-                HStack(spacing: 4) {
-                    Circle().frame(width: 8, height: 8).opacity(0.5)
-                    Circle().frame(width: 8, height: 8).opacity(0.8)
-                    Circle().frame(width: 8, height: 8)
+                // "Thinking" indicator with a cool animation
+                HStack(spacing: 5) {
+                    DotView(delay: 0)
+                    DotView(delay: 0.2)
+                    DotView(delay: 0.4)
                 }
                 .padding()
                 .background(Color.neuraSurface)
-                .cornerRadius(16)
+                .cornerRadius(20, corners: [.topLeft, .topRight, .bottomLeft])
+                
             } else {
                 Text(message.text)
-                    .padding()
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
                     .foregroundColor(.white)
-                    .background(message.author == .user ? Color.neuraPrimary : Color.neuraSurface)
-                    .cornerRadius(16)
+                    .background(message.author == .user ? AnyShapeStyle(Color.neuraPrimaryGradient) : AnyShapeStyle(Color.neuraSurface))
+                    .cornerRadius(20, corners: message.author == .user ? [.topLeft, .topRight, .bottomLeft] : [.topLeft, .topRight, .bottomRight])
             }
 
             if message.author == .agent {
-                Spacer()
+                Spacer(minLength: 50)
             }
         }
         .padding(.horizontal)
-        .padding(.vertical, 4)
+    }
+}
+
+// Helper to selectively round corners of a view
+extension View {
+    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
+        clipShape(RoundedCorner(radius: radius, corners: corners))
+    }
+}
+
+struct RoundedCorner: Shape {
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(roundedRect: rect, byRoundingCorners: corners, cornerRadii: CGSize(width: radius, height: radius))
+        return Path(path.cgPath)
+    }
+}
+
+// A simple dot for the "thinking" animation
+struct DotView: View {
+    @State private var scale: CGFloat = 0.5
+    let delay: Double
+
+    var body: some View {
+        Circle()
+            .frame(width: 8, height: 8)
+            .scaleEffect(scale)
+            .onAppear {
+                withAnimation(Animation.easeInOut(duration: 0.6).repeatForever().delay(delay)) {
+                    self.scale = 1
+                }
+            }
     }
 }

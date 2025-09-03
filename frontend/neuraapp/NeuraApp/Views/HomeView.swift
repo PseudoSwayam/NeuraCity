@@ -7,51 +7,60 @@ struct HomeView: View {
     @State private var alerts: [Alert] = []
     
     var body: some View {
-        NavigationView {
-            ScrollView {
+        // We use a ZStack to layer the background gradient behind our content
+        ZStack {
+            RadialGradient(gradient: Gradient(colors: [.neuraSurface, .neuraBackground]), center: .topLeading, startRadius: 5, endRadius: 900)
+                .ignoresSafeArea()
+
+            NavigationView {
+                // Main content is now in a VStack instead of a ScrollView,
+                // because our alerts panel will handle its own scrolling.
                 VStack(alignment: .leading, spacing: 24) {
                     WelcomeHeader()
                     AttendanceCard()
-                    LiveAlertsSection(alerts: alerts)
+                    // The alerts section is now a fixed-height, scrollable panel.
+                    LiveAlertsPanel(alerts: alerts)
                 }
                 .padding()
-            }
-            .navigationTitle("Dashboard")
-            .background(Color.neuraBackground)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        authViewModel.logout()
-                    }) {
-                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                .navigationTitle("Dashboard")
+                .background(.clear) // Let the ZStack's gradient show through
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            authViewModel.logout()
+                        }) {
+                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                        }
                     }
                 }
             }
-            // Use dark navigation bar style throughout the app
-            .navigationBarTitleDisplayMode(.large)
-        }
-        .onAppear {
-            // Apply a consistent dark theme to the navigation bar
-            let appearance = UINavigationBarAppearance()
-            appearance.configureWithOpaqueBackground()
-            appearance.backgroundColor = UIColor(Color.neuraBackground)
-            appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
-            appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-            UINavigationBar.appearance().standardAppearance = appearance
-            UINavigationBar.appearance().scrollEdgeAppearance = appearance
-            UINavigationBar.appearance().compactAppearance = appearance
-        }
-        .onReceive(webSocketService.$latestAlert) { newAlert in
-            guard let newAlert = newAlert else { return }
-            // Add the new alert to the top of our list with an animation
-            withAnimation {
-                alerts.insert(newAlert, at: 0)
+            // Use .task for modern, safe view appearance logic
+            .task {
+                setupNavigationBarAppearance()
+            }
+            .onReceive(webSocketService.$latestAlert) { newAlert in
+                guard let newAlert = newAlert else { return }
+                // Use a spring animation for a bouncy, delightful effect when a new alert arrives
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                    alerts.insert(newAlert, at: 0)
+                }
             }
         }
     }
+    
+    private func setupNavigationBarAppearance() {
+        let appearance = UINavigationBarAppearance()
+        // Make navigation bar transparent to show the gradient behind
+        appearance.configureWithTransparentBackground()
+        appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+        appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+        UINavigationBar.appearance().standardAppearance = appearance
+        UINavigationBar.appearance().scrollEdgeAppearance = appearance
+        UINavigationBar.appearance().compactAppearance = appearance
+    }
 }
 
-// --- Sub-views for HomeView (Complete and Correct) ---
+// --- SUB-VIEWS FOR HOMEVIEW ---
 
 struct WelcomeHeader: View {
     @State private var userName: String = "..."
@@ -62,28 +71,24 @@ struct WelcomeHeader: View {
                 .font(.subheadline)
                 .foregroundColor(.gray)
             Text(userName)
-                .font(.largeTitle)
-                .fontWeight(.bold)
+                .font(.largeTitle.weight(.bold))
         }
-        .task { // Use .task for modern, safe async operations in SwiftUI
-            await loadUserData()
-        }
+        .task { await loadUserData() }
     }
     
     private func loadUserData() async {
         do {
             let user = try await ApiService.shared.getMyProfile()
             self.userName = user.fullName
-        } catch {
-            self.userName = "User"
-        }
+        } catch { self.userName = "User" }
     }
 }
 
 struct AttendanceCard: View {
     var body: some View {
-        HStack {
-            Image(systemName: "location.fill")
+        HStack(spacing: 16) {
+            Image(systemName: "figure.walk.arrival") // Better icon
+                .font(.title)
                 .foregroundColor(.neuraAccent)
             VStack(alignment: .leading) {
                 Text("Last Activity").fontWeight(.semibold)
@@ -92,43 +97,62 @@ struct AttendanceCard: View {
             Spacer()
         }
         .padding()
-        .background(Color.neuraSurface)
-        .cornerRadius(12)
+        .background(FrostedGlassView()) // Use the new glass effect!
+        .cornerRadius(15)
+        .overlay(RoundedRectangle(cornerRadius: 15).stroke(Color.white.opacity(0.1))) // Subtle border
     }
 }
 
-struct LiveAlertsSection: View {
+// THIS IS THE NEW SCROLLABLE PANEL
+struct LiveAlertsPanel: View {
     let alerts: [Alert]
     
     var body: some View {
         VStack(alignment: .leading) {
             Text("Live Campus Alerts")
                 .font(.title2).fontWeight(.bold)
+                .padding(.horizontal)
             
-            if alerts.isEmpty {
-                Text("No recent alerts. Campus is secure.")
-                    .foregroundColor(.gray)
-                    .padding()
-                    .frame(maxWidth: .infinity, minHeight: 100)
-                    .background(Color.neuraSurface)
-                    .cornerRadius(12)
-            } else {
-                // Display up to the 5 most recent alerts
-                ForEach(alerts.prefix(5)) { alert in
-                    AlertRow(alert: alert)
+            // A ScrollView that contains our list of alerts.
+            // This makes the panel itself scrollable, independent of the main screen.
+            ScrollView {
+                if alerts.isEmpty {
+                    VStack {
+                        Image(systemName: "checkmark.shield.fill")
+                            .font(.largeTitle)
+                            .foregroundColor(.green)
+                        Text("No recent alerts.")
+                            .fontWeight(.semibold)
+                        Text("The campus is secure.")
+                            .foregroundColor(.gray)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 50)
+                } else {
+                    LazyVStack(spacing: 0) { // LazyVStack is efficient for long lists
+                        ForEach(alerts) { alert in
+                            AlertRow(alert: alert)
+                        }
+                    }
                 }
             }
+            .padding(.top, 8)
         }
+        .padding(.vertical)
+        .background(FrostedGlassView())
+        .cornerRadius(20)
+        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.white.opacity(0.1)))
     }
 }
 
 struct AlertRow: View {
     let alert: Alert
-
+    
     var body: some View {
-        HStack {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .foregroundColor(.yellow)
+        HStack(spacing: 16) {
+            Image(systemName: "bell.and.waveform.fill")
+                .font(.title2)
+                .foregroundColor(alert.eventType == "CV_SECURITY_ALERT" ? .red : .yellow)
             VStack(alignment: .leading) {
                 Text(alert.location).fontWeight(.semibold)
                 Text(alert.humanReadableMessage)
@@ -138,12 +162,12 @@ struct AlertRow: View {
             }
             Spacer()
             Text(alert.timestamp, style: .time)
-                .font(.caption)
+                .font(.subheadline.monospacedDigit())
                 .foregroundColor(.gray)
         }
         .padding()
-        .background(alert.eventType == "CV_SECURITY_ALERT" ? Color.red.opacity(0.2) : Color.neuraSurface)
-        .cornerRadius(12)
-        .transition(.asymmetric(insertion: .move(edge: .top).combined(with: .opacity), removal: .scale))
+        // Add a nice dividing line between alerts
+        .overlay(Divider().padding(.horizontal).opacity(0.3), alignment: .bottom)
+        .transition(.asymmetric(insertion: .move(edge: .top).combined(with: .opacity), removal: .scale.combined(with: .opacity)))
     }
 }
